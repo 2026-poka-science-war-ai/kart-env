@@ -1,0 +1,14 @@
+FROM pytorch/pytorch:2.1.1-cuda12.1-cudnn8-devel
+
+WORKDIR /kart_env
+
+RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    locales \
+    dolphin-emu xvfb \
+    x11vnc novnc websockify \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && locale-gen en_US.UTF-8
