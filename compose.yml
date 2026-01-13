@@ -1,0 +1,46 @@
+name: kart_env
+
+services:
+  kart_env:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kart_env
+    container_name: kart_env
+    ports:
+      - "6080-6091:6080-6091" # Assume we use 12 clients in a container
+    volumes:
+      - .:/kart_env
+    ipc: host
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    stdin_open: true
+    tty: true
+    cap_add:
+      - SYS_PTRACE
+    extra_hosts:
+      - "gamestats.gs.nintendowifi.net:146.56.169.123"
+      - "gamestats2.gs.nintendowifi.net:146.56.169.123"
+      - "gpcm.gs.nintendowifi.net:146.56.169.123"
+      - "gpsp.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.available.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.gamestats.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.gamestats2.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.master.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.ms19.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.natneg1.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.natneg2.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.natneg3.gs.nintendowifi.net:146.56.169.123"
+      - "mariokartwii.sake.gs.nintendowifi.net:146.56.169.123"
+      - "naswii.nintendowifi.net:146.56.169.123"
+      - "nas.nintendowifi.net:146.56.169.123"
+      - "nintendowifi.net:146.56.169.123"
+      - "wiimmfi.de:146.56.169.123"
