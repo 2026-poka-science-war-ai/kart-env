@@ -1,4 +1,4 @@
 from utils.kart_instance import KartInstance
 
 if __name__ == "__main__":
-    env = KartInstance(env_id=0, hard_reset=True)
+    envs = [KartInstance(env_id=i, hard_reset=True) for i in range(3)]
