@@ -12,3 +12,5 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen en_US.UTF-8
+
+ENV NVIDIA_DRIVER_CAPABILITIES="all"
