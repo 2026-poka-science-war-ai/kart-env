@@ -55,6 +55,9 @@ class KartInstance:
         self.processes.append(subprocess.Popen(websockify_command))
 
         dolphin_command = [
+            "vglrun",
+            "-d",
+            "egl0",
             DOLPHIN_BIN,
             "--batch",
             f"--user={self.user_dir}",
