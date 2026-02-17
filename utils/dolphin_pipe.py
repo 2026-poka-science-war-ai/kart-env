@@ -2,7 +2,6 @@ import os
 from enum import Enum
 import pathlib
 
-
 class Button(str, Enum):
     A = "A"
     B = "B"
@@ -27,12 +26,25 @@ class DolphinPipe:
 
     def __init__(self, env_id: int):
         self.env_id = env_id
-        pipe_dir = pathlib.Path(f"/kart_env/users/{env_id}/Pipes")
-        self.pipe_path = pipe_dir / "pipe1"
+        
+        base_dir = pathlib.Path(os.path.abspath("./users/fixed_player"))
+        pipe_dir = base_dir / "Pipes"
+        
+        self.pipe_path = pipe_dir / "pipe"
+        
         pipe_dir.mkdir(parents=True, exist_ok=True)
-        if not self.pipe_path.exists():
-            os.mkfifo(self.pipe_path)
+        
+        if self.pipe_path.exists():
+            try:
+                os.unlink(self.pipe_path)
+            except OSError:
+                pass
+
+        os.mkfifo(self.pipe_path)
+        
+        print(f"[Pipe] 파이프 연결 대기 중... (경로: {self.pipe_path})")
         self.pipe = open(self.pipe_path, "w", buffering=1)
+        print("[Pipe] 파이프 연결 성공!")
 
     def close(self):
         self.pipe.close()

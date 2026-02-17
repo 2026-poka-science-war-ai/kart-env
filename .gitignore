@@ -1,3 +1,21 @@
-__pycache__/
-MarioKartWii.iso
+# 1. 게임 파일 및 실행 파일 (절대 올리면 안 됨)
+*.iso
+*.wbfs
+*.rvz
+dolphin-emu.AppImage
+squashfs-root/
+AppDir/
+
+# 2. 런타임 데이터 (로그, 파이프, 유저 설정)
 users/
+logs/
+*.log
+*.png
+*.jpg
+
+# 3. 파이썬 가상환경 및 캐시
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
