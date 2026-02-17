@@ -28,16 +28,16 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     # evdev
     libevdev-dev \
     # SDL
-    libsdl3-dev \
+    # libsdl3-dev \
     # FMT
-    libfmt-dev \
+    # libfmt-dev \
     # glslang
     glslang-dev \
     glslang-tools \
     # pugixml
     libpugixml-dev \
     # enet
-    libenet-dev \
+    # libenet-dev \
     # xxhash
     libxxhash-dev \
     # bzip2
@@ -47,7 +47,7 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     # zstd
     libzstd-dev \
     # zlib
-    zlib1g-dev \
+    # zlib1g-dev \
     # minizip-ng
     ## Not packaged yet (but soon on Debian)
     # lzo
