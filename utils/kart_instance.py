@@ -8,7 +8,7 @@ from utils.kart_mem import KartMem
 from utils.dolphin_pipe import DolphinPipe, Button
 
 SETTINGS_DIR = "/kart_env/dolphin_settings/"
-DOLPHIN_BIN = "/usr/games/dolphin-emu"
+DOLPHIN_BIN = "/usr/local/bin/dolphin-emu"
 ISO_PATH = "/kart_env/MarioKartWii.iso"
 
 

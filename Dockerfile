@@ -6,7 +6,7 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     sed -i 's/security.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    locales wget xvfb x11vnc novnc websockify git dolphin-emu \
+    locales wget xvfb x11vnc novnc websockify git \
     # PkgConfig
     pkg-config \
     # OpenGL
@@ -98,5 +98,21 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen en_US.UTF-8
+
+RUN git clone https://github.com/dolphin-emu/dolphin.git /dolphin-src && \
+    cd /dolphin-src && \
+    git -c submodule."Externals/Qt".update=none \
+        -c submodule."Externals/FFmpeg-bin".update=none \
+        -c submodule."Externals/libadrenotools".update=none \
+        submodule update --init --recursive && \
+    mkdir build && cd build && \
+    cmake .. \
+        -DUSE_SYSTEM_MINIZIP-NG=OFF \
+        -DUSE_SYSTEM_SFML=OFF \
+        -DUSE_SYSTEM_MBEDTLS=OFF \
+        -DUSE_SYSTEM_LIBMGBA=OFF && \
+    make -j$(nproc) && \
+    make install && \
+    cd / && rm -rf /dolphin-src
 
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
