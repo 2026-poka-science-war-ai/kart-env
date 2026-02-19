@@ -18,6 +18,7 @@ from .utils.enums import (
     dolphin_path,
     iso_path,
     dolphin_settings_path,
+    script_path,
 )
 
 ObsType = TypeVar("ObsType")
@@ -135,6 +136,8 @@ class KartEnvironment(ParallelEnv):
             f"--user={self.user_dir}",
             "-e",
             iso_path,
+            "--script",
+            f"{script_path}",
         ]
         dolphin_env = os.environ.copy()
         dolphin_env["DISPLAY"] = f":{self.env_id}"
