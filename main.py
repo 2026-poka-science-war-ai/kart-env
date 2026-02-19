@@ -1,4 +1,4 @@
-from utils.kart_instance import KartInstance
+from kart_env import KartEnvironment
 
 if __name__ == "__main__":
-    envs = [KartInstance(env_id=i, hard_reset=False) for i in range(3)]
+    env = KartEnvironment()
