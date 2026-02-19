@@ -115,4 +115,9 @@ RUN git clone https://github.com/dolphin-emu/dolphin.git /dolphin-src && \
     make install && \
     cd / && rm -rf /dolphin-src
 
+RUN uv venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY requirements.txt .
+RUN uv pip install -r requirements.txt && rm requirements.txt
+
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
