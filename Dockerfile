@@ -99,8 +99,8 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen en_US.UTF-8
 
-RUN git clone https://github.com/dolphin-emu/dolphin.git /dolphin-src && \
-    cd /dolphin-src && \
+COPY dolphin-src /dolphin-src
+RUN cd /dolphin-src && \
     git -c submodule."Externals/Qt".update=none \
         -c submodule."Externals/FFmpeg-bin".update=none \
         -c submodule."Externals/libadrenotools".update=none \
@@ -110,7 +110,8 @@ RUN git clone https://github.com/dolphin-emu/dolphin.git /dolphin-src && \
         -DUSE_SYSTEM_MINIZIP-NG=OFF \
         -DUSE_SYSTEM_SFML=OFF \
         -DUSE_SYSTEM_MBEDTLS=OFF \
-        -DUSE_SYSTEM_LIBMGBA=OFF && \
+        -DUSE_SYSTEM_LIBMGBA=OFF \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
     make -j$(nproc) && \
     make install && \
     cd / && rm -rf /dolphin-src
