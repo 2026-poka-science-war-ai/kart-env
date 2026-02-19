@@ -5,12 +5,20 @@ import pathlib
 from typing import TypeVar
 import subprocess
 import os
+import shutil
 import time
 import atexit
 
 from .utils.kart_mem import KartMem
 from .utils.dolphin_pipe import DolphinPipe
-from .utils.enums import vnc_base, novnc_base, user_base, dolphin_path, iso_path
+from .utils.enums import (
+    vnc_base,
+    novnc_base,
+    user_base,
+    dolphin_path,
+    iso_path,
+    dolphin_settings_path,
+)
 
 ObsType = TypeVar("ObsType")
 ActionType = TypeVar("ActionType")
@@ -28,6 +36,9 @@ class KartEnvironment(ParallelEnv):
         self.vnc_port = vnc_base + env_id
         self.novnc_port = novnc_base + env_id
         self.user_dir = pathlib.Path(user_base) / str(env_id)
+
+        if not self.user_dir.exists():
+            shutil.copytree(dolphin_settings_path, self.user_dir)
 
         self.processes: list[subprocess.Popen] = []
         atexit.register(self.close)
