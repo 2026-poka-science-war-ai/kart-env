@@ -8,18 +8,11 @@ import os
 import shutil
 import time
 import atexit
+import socket
 
 from .utils.kart_mem import KartMem
 from .utils.dolphin_pipe import DolphinPipe
-from .utils.enums import (
-    vnc_base,
-    novnc_base,
-    user_base,
-    dolphin_path,
-    iso_path,
-    dolphin_settings_path,
-    script_path,
-)
+from .utils.enums import *
 
 ObsType = TypeVar("ObsType")
 ActionType = TypeVar("ActionType")
@@ -36,6 +29,7 @@ class KartEnvironment(ParallelEnv):
         self.env_id = env_id
         self.vnc_port = vnc_base + env_id
         self.novnc_port = novnc_base + env_id
+        self.sock_port = sock_base + env_id
         self.user_dir = pathlib.Path(user_base) / str(env_id)
 
         if not self.user_dir.exists():
@@ -52,9 +46,11 @@ class KartEnvironment(ParallelEnv):
     ) -> tuple[dict[AgentID, ObsType], dict[AgentID, dict]]:
 
         observations = {}
-        # TODO load saved memory state
-        for i, agent in enumerate(self.agents):
-            observations[agent] = 1  # TODO get observation from felk dolphin
+        self.conn.sendall(b"reset")  # TODO load saved memory state
+        assert self.conn.recv(1024) == b"reset_done"
+        # graphic_obs = self.obs_view.copy() # TODO read graphic obs from shared memory
+        vector_obs = self.mem.read_obs()
+        # TODO combine graphic_obs and vector_obs into a single observation dict
         return ({}, {})
 
     def step(self, actions: dict[AgentID, ActionType]) -> tuple[
@@ -71,22 +67,25 @@ class KartEnvironment(ParallelEnv):
         truncations = {}
         infos = {}
 
-        for i, agent in enumerate(self.agents):
-            # TODO send action and return obs from felk python
-            observations[agent] = 1
-            rewards[agent] = 0.0
-            terminations[agent] = False
-            truncations[agent] = False
-            infos[agent] = {}
+        # Send actions to the game process
+        self.conn.sendall(b"step")  # TODO send actual actions
+        assert self.conn.recv(1024) == b"step_done"
+        # read from shared memory for obs, rewards, terminations, truncations, infos
+        vector_obs = self.mem.read_obs()
+        # TODO parse vector_obs into observations, rewards, terminations, truncations, infos
+
         return observations, rewards, terminations, truncations, infos
 
     def close(self):
+        self.conn.sendall(b"close")
+        self.conn.close()
+        self.server_sock.close()
+
         try:
             for proc in reversed(self.processes):
                 proc.terminate()
                 proc.wait()
 
-            # TODO close dolphin pipe
         except Exception:
             pass
 
@@ -99,7 +98,11 @@ class KartEnvironment(ParallelEnv):
         return spaces.Discrete(1)
 
     def _run_env(self):
-        # TODO make dolphin pipe file
+        self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.server_sock.bind(("localhost", self.sock_port))
+        self.server_sock.listen(1)
 
         xvfb_command = ["Xvfb", f":{self.env_id}", "-screen", "0", "640x480x24"]
         self.processes.append(subprocess.Popen(xvfb_command))
@@ -143,4 +146,6 @@ class KartEnvironment(ParallelEnv):
         dolphin_env["DISPLAY"] = f":{self.env_id}"
         dolphin_process = subprocess.Popen(dolphin_command, env=dolphin_env)
         self.processes.append(dolphin_process)
+
+        self.conn, _ = self.server_sock.accept()
         self.mem = KartMem(dolphin_process.pid)

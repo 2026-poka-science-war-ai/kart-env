@@ -2,4 +2,6 @@ from .dolphin_mem import DolphinMem
 
 
 class KartMem(DolphinMem):
-    pass
+    def read_obs(self):
+        # TODO read actual obs
+        return [0.0]
