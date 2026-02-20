@@ -28,13 +28,13 @@ class KartEnvironment(ParallelEnv):
         self.agents = self.possible_agents
 
         self.env_id = env_id
-        self.vnc_port = vnc_base + env_id
-        self.novnc_port = novnc_base + env_id
-        self.sock_port = sock_base + env_id
-        self.user_dir = pathlib.Path(user_base) / str(env_id)
+        self.vnc_port = VNC_BASE + env_id
+        self.novnc_port = NOVNC_BASE + env_id
+        self.sock_port = SOCK_BASE + env_id
+        self.user_dir = pathlib.Path(USER_BASE) / str(env_id)
 
         if not self.user_dir.exists():
-            shutil.copytree(dolphin_settings_path, self.user_dir)
+            shutil.copytree(DOLPHIN_SETTINGS_PATH, self.user_dir)
 
         self.processes: list[subprocess.Popen] = []
         atexit.register(self.close)
@@ -156,13 +156,13 @@ class KartEnvironment(ParallelEnv):
             "vglrun",
             "-d",
             "egl0",
-            dolphin_path,
+            DOLPHIN_PATH,
             "--batch",
             f"--user={self.user_dir}",
             "-e",
-            iso_path,
+            ISO_PATH,
             "--script",
-            f"{script_path}",
+            f"{SCRIPT_PATH}",
         ]
         dolphin_env = os.environ.copy()
         dolphin_env["DISPLAY"] = f":{self.env_id}"
