@@ -2,13 +2,14 @@ import functools
 from pettingzoo import ParallelEnv
 from gymnasium import spaces
 import pathlib
-from typing import TypeVar
+from typing import TypeVar, Any, Dict
 import subprocess
 import os
 import shutil
 import time
 import atexit
 import socket
+import struct
 import numpy as np
 
 from .utils.kart_mem import KartMem
@@ -16,8 +17,8 @@ from .utils.dolphin_pipe import DolphinPipe
 from .utils.enums import *
 
 ObsType = TypeVar("ObsType")
-ActionType = TypeVar("ActionType")
-AgentID = TypeVar("AgentID")
+ActionType = Dict[str, Any]
+AgentID = int
 
 
 class KartEnvironment(ParallelEnv):
@@ -68,8 +69,8 @@ class KartEnvironment(ParallelEnv):
         truncations = {}
         infos = {}
 
-        # Send actions to the game process
-        self.conn.sendall(b"step")  # TODO send actual actions
+        payload = b"step" + self._pack_actions(actions)
+        self.conn.sendall(payload)
         assert self.conn.recv(1024) == b"step_done"
         # read from shared memory for obs, rewards, terminations, truncations, infos
         vector_obs = self.mem.read_obs()
@@ -171,3 +172,27 @@ class KartEnvironment(ParallelEnv):
 
         self.conn, _ = self.server_sock.accept()
         self.mem = KartMem(dolphin_process.pid)
+
+    def _pack_actions(self, actions: dict[AgentID, ActionType]) -> bytes:
+        data = []
+        for i in range(4):
+            action = actions.get(i, NEUTRAL_ACTION)
+
+            button_mask = 0
+            for j, btn in enumerate(GC_BUTTONS):
+                if action[btn]:
+                    button_mask |= 1 << j
+
+            data.append(button_mask)
+            data.extend(
+                [
+                    action["StickX"],
+                    action["StickY"],
+                    action["CStickX"],
+                    action["CStickY"],
+                    action["TriggerLeft"],
+                    action["TriggerRight"],
+                ]
+            )
+
+        return struct.pack("<" + "H6f" * 4, *data)
