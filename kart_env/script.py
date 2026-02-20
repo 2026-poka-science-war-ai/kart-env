@@ -11,6 +11,8 @@ GC_BUTTONS = ["A", "B", "X", "Y", "Z", "Start", "Up", "Down", "Left", "Right", "
 AGENT_STRUCT = "<H6f"
 AGENT_SIZE = struct.calcsize(AGENT_STRUCT)
 
+SAVE_PATH = "/kart_env/save"
+
 red = 0xFFFF0000
 frame_counter = 0
 while True:
@@ -43,6 +45,7 @@ while True:
         sock.sendall(b"step_done")
 
     elif data.startswith(b"reset"):
+        savestate.load_from_file(SAVE_PATH)
         await event.frameadvance()
         sock.sendall(b"reset_done")
 
