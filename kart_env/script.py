@@ -1,4 +1,4 @@
-from dolphin import event, gui, controller
+from dolphin import event, gui, controller, savestate
 import socket
 import struct
 
@@ -15,9 +15,9 @@ red = 0xFFFF0000
 frame_counter = 0
 while True:
     data = sock.recv(1024)
+    payload = data[4:]
 
     if data.startswith(b"step"):
-        payload = data[4:]
         for i in range(4):
             offset = i * AGENT_SIZE
             btn_mask, sx, sy, csx, csy, tl, tr = struct.unpack_from(
@@ -49,6 +49,9 @@ while True:
     elif data.startswith(b"close"):
         sock.close()
         break
+
+    elif data.startswith(b"exec"):
+        exec(payload.decode())
 
     frame_counter += 1
     # draw on screen
