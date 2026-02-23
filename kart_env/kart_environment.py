@@ -13,7 +13,6 @@ import struct
 import numpy as np
 
 from .utils.kart_mem import KartMem
-from .utils.dolphin_pipe import DolphinPipe
 from .utils.enums import *
 
 ObsType = TypeVar("ObsType")
