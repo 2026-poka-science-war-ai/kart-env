@@ -13,7 +13,7 @@ class DolphinMem:
         for fd_num in os.listdir(fd_dir):
             fd_path = os.path.join(fd_dir, fd_num)
             if "/dev/shm/dolphin-emu" in os.readlink(fd_path):
-                with open(fd_path, "r") as f:
+                with open(fd_path, "rb") as f:
                     target_fd = f.fileno()
                     # fmt: off
                     self.mm = mmap.mmap(target_fd, 0, flags=mmap.MAP_SHARED, prot=mmap.PROT_READ)
@@ -46,6 +46,7 @@ class DolphinMem:
         return self.read_u32(addr)
 
     def resolve_chain(self, base_addr: int, offsets: List[int]) -> int:
+        assert len(offsets) > 0
         curr = self.read_ptr(base_addr)
         for offset in offsets[:-1]:
             curr += offset
