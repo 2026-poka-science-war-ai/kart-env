@@ -174,7 +174,9 @@ class KartEnvironment(ParallelEnv):
     def _pack_actions(self, actions: dict[AgentID, ActionType]) -> bytes:
         data = []
         for i in range(4):
-            action = actions.get(i, NEUTRAL_ACTION)
+            action = NEUTRAL_ACTION.copy()
+            if i in actions:
+                action.update(actions[i])
 
             button_mask = 0
             for j, btn in enumerate(GC_BUTTONS):
