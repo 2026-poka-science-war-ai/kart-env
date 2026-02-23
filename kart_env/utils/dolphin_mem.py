@@ -8,25 +8,27 @@ class DolphinMem:
         self.pid = pid
         self.mem1_addr = 0
         self.mem2_addr = 0
-
-    def init(self):
         with open(f"/proc/{self.pid}/maps") as f:
             for line in f:
-                if "/dev/shm/dolphinmem" not in line:
+                if "/dev/shm/dolphin" not in line:
                     continue
 
-                start_addr, end_addr = [int(x, 16) for x in line.split()[0].split("-")]
+                parts = line.split()
+                start_addr, end_addr = [int(x, 16) for x in parts[0].split("-")]
+                offset = int(parts[2], 16)
                 size = end_addr - start_addr
 
-                if self.mem1_addr == 0 and size == 0x02000000:
+                # fmt: off
+                if self.mem1_addr == 0 and size == 0x02000000 and offset == 0:
                     self.mem1_addr = start_addr
-                elif self.mem2_addr == 0 and size == 0x04000000:
+                elif self.mem2_addr == 0 and size == 0x04000000 and offset == 0x02040000:
                     self.mem2_addr = start_addr
+                # fmt: on
                 if self.mem1_addr != 0 and self.mem2_addr != 0:
                     break
+        assert self.mem1_addr != 0 and self.mem2_addr != 0
 
     def read_byte(self, address: int) -> bytes:
-        assert self.mem1_addr != 0 and self.mem2_addr != 0, "DolphinMem not initialized"
 
         if self.MEM1_START <= address < self.MEM1_START + self.MEM1_SIZE:
             host_addr = self.mem1_addr + (address - self.MEM1_START)
@@ -40,7 +42,6 @@ class DolphinMem:
             return f.read(1)
 
     def write_byte(self, address: int, value: bytes):
-        assert self.mem1_addr != 0 and self.mem2_addr != 0, "DolphinMem not initialized"
 
         if self.MEM1_START <= address < self.MEM1_START + self.MEM1_SIZE:
             host_addr = self.mem1_addr + (address - self.MEM1_START)
