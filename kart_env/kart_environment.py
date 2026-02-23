@@ -68,9 +68,7 @@ class KartEnvironment(ParallelEnv):
         truncations = {}
         infos = {}
 
-        payload = b"step" + self._pack_actions(actions)
-        self.conn.sendall(payload)
-        assert self.conn.recv(1024) == b"step_done"
+        self._send_actions(actions)
         # read from shared memory for obs, rewards, terminations, truncations, infos
         vector_obs = self.mem.read_obs()
         # TODO parse vector_obs into observations, rewards, terminations, truncations, infos
@@ -195,3 +193,8 @@ class KartEnvironment(ParallelEnv):
             )
 
         return struct.pack("<" + "H6f" * 4, *data)
+
+    def _send_actions(self, actions: dict[AgentID, ActionType]):
+        payload = b"step" + self._pack_actions(actions)
+        self.conn.sendall(payload)
+        assert self.conn.recv(1024) == b"step_done"
