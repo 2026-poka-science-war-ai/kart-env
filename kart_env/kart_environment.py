@@ -2,7 +2,7 @@ import functools
 from pettingzoo import ParallelEnv
 from gymnasium import spaces
 import pathlib
-from typing import TypeVar, Any, Dict
+from typing import Any, Dict
 import subprocess
 import os
 import shutil
@@ -15,7 +15,7 @@ import numpy as np
 from .utils.kart_mem import KartMem
 from .utils.enums import *
 
-ObsType = TypeVar("ObsType")
+ObsType = Dict[str, Any]
 ActionType = Dict[str, Any]
 AgentID = int
 
