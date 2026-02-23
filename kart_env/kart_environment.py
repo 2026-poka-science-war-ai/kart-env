@@ -14,6 +14,7 @@ import numpy as np
 
 from .utils.kart_mem import KartMem
 from .utils.enums import *
+from .utils.helper import launch_game
 
 ObsType = Dict[str, Any]
 ActionType = Dict[str, Any]
@@ -39,7 +40,7 @@ class KartEnvironment(ParallelEnv):
         self.processes: list[subprocess.Popen] = []
         atexit.register(self.close)
         self._run_env()
-        # TODO macro to start game
+        launch_game(self)
         # TODO save memory state to fast reset
 
     def reset(
