@@ -15,8 +15,8 @@ class DolphinMem:
                     target_fd = f.fileno()
                     # fmt: off
                     self.mm = mmap.mmap(target_fd, 0, flags=mmap.MAP_SHARED, prot=mmap.PROT_READ)
-                    self.mv = memoryview(self.mm)
                     # fmt: on
+                    self.mv = memoryview(self.mm)
                     return
 
         raise ValueError()
@@ -32,3 +32,7 @@ class DolphinMem:
     def read_byte(self, addr: int) -> int:
         offset = self.get_offset(addr)
         return self.mv[offset]
+
+    def read_obs(self):
+        # TODO read actual obs
+        return [0.0]

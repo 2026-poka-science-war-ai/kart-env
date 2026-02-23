@@ -12,7 +12,7 @@ import socket
 import struct
 import numpy as np
 
-from .utils.kart_mem import KartMem
+from .utils.dolphin_mem import DolphinMem
 from .utils.enums import *
 from .utils.helper import launch_game
 
@@ -169,7 +169,7 @@ class KartEnvironment(ParallelEnv):
         self.processes.append(dolphin_process)
 
         self.conn, _ = self.server_sock.accept()
-        self.mem = KartMem(dolphin_process.pid)
+        self.mem = DolphinMem(dolphin_process.pid)
 
     def _pack_actions(self, actions: dict[AgentID, ActionType]) -> bytes:
         data = []
