@@ -13,9 +13,6 @@ AGENT_SIZE = struct.calcsize(AGENT_STRUCT)
 
 SAVE_PATH = "/kart_env/save"
 
-for _ in range(50):
-    await event.frameadvance()
-
 red = 0xFFFF0000
 frame_counter = 0
 while True:
