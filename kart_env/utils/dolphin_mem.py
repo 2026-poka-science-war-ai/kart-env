@@ -1,5 +1,7 @@
 import mmap
 import os
+import struct
+from typing import List
 
 
 class DolphinMem:
@@ -29,9 +31,26 @@ class DolphinMem:
 
         raise ValueError()
 
-    def read_byte(self, addr: int) -> int:
-        offset = self.get_offset(addr)
-        return self.mv[offset]
+    def read_u8(self, addr: int) -> int:
+        return self.mv[self.get_offset(addr)]
+
+    def read_u32(self, addr: int) -> int:
+        off = self.get_offset(addr)
+        return struct.unpack(">I", self.mv[off : off + 4])[0]
+
+    def read_f32(self, addr: int) -> float:
+        off = self.get_offset(addr)
+        return struct.unpack(">f", self.mv[off : off + 4])[0]
+
+    def read_ptr(self, addr: int) -> int:
+        return self.read_u32(addr)
+
+    def resolve_chain(self, base_addr: int, offsets: List[int]) -> int:
+        curr = self.read_ptr(base_addr)
+        for offset in offsets[:-1]:
+            curr += offset
+            curr = self.read_ptr(curr)
+        return curr + offsets[-1]
 
     def read_obs(self):
         # TODO read actual obs
