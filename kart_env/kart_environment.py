@@ -99,11 +99,22 @@ class KartEnvironment(ParallelEnv):
             {
                 "A": spaces.Discrete(2),
                 "B": spaces.Discrete(2),
+                # "X": spaces.Discrete(2),
+                # "Y": spaces.Discrete(2),
+                # "Z": spaces.Discrete(2),
+                # "Start": spaces.Discrete(2),
                 "Up": spaces.Discrete(2),
                 "Down": spaces.Discrete(2),
+                # "Left": spaces.Discrete(2),
+                # "Right": spaces.Discrete(2),
                 "L": spaces.Discrete(2),
                 "R": spaces.Discrete(2),
                 "StickX": spaces.Box(-1.0, 1.0, (), np.float32),
+                # "StickY": spaces.Box(-1.0, 1.0, (), np.float32),
+                # "CStickX": spaces.Box(-1.0, 1.0, (), np.float32),
+                # "CStickY": spaces.Box(-1.0, 1.0, (), np.float32),
+                # "TriggerLeft": spaces.Box(0.0, 1.0, (), np.float32),
+                # "TriggerRight": spaces.Box(0.0, 1.0, (), np.float32),
             }
         )
 
