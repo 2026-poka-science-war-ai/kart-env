@@ -25,7 +25,7 @@ class KartEnvironment(ParallelEnv):
     metadata = {"name": "kart_environment"}
 
     def __init__(self, env_id: int = 0):
-        self.possible_agents = [i for i in range(4)]
+        self.possible_agents = [i for i in range(5)]
         self.agents = self.possible_agents
 
         self.env_id = env_id
@@ -95,6 +95,8 @@ class KartEnvironment(ParallelEnv):
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent):  # type: ignore
+        if agent == 0:
+            return spaces.Discrete(1)
         return spaces.Dict(
             {
                 "A": spaces.Discrete(2),
@@ -173,7 +175,7 @@ class KartEnvironment(ParallelEnv):
 
     def _pack_actions(self, actions: dict[AgentID, ActionType]) -> bytes:
         data = []
-        for i in range(4):
+        for i in range(1, 5):
             action = NEUTRAL_ACTION.copy()
             if i in actions:
                 action.update(actions[i])
