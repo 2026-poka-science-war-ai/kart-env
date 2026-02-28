@@ -50,9 +50,11 @@ class KartEnvironment(ParallelEnv):
         observations = {}
         self.conn.sendall(b"reset")  # TODO load saved memory state
         assert self.conn.recv(1024) == b"reset_done"
-        # graphic_obs = self.obs_view.copy() # TODO read graphic obs from shared memory
+
         vector_obs = self.mem.read_obs()
         # TODO combine graphic_obs and vector_obs into a single observation dict
+        return vector_obs  # type: ignore
+
         return ({}, {})
 
     def step(self, actions: dict[AgentID, ActionType]) -> tuple[
@@ -70,9 +72,10 @@ class KartEnvironment(ParallelEnv):
         infos = {}
 
         self._send_actions(actions)
-        # read from shared memory for obs, rewards, terminations, truncations, infos
+
         vector_obs = self.mem.read_obs()
-        # TODO parse vector_obs into observations, rewards, terminations, truncations, infos
+        # TODO combine graphic_obs and vector_obs into a single observation dict
+        return vector_obs  # type: ignore
 
         return observations, rewards, terminations, truncations, infos
 
