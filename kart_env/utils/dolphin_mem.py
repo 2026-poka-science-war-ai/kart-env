@@ -271,16 +271,16 @@ class DolphinMem:
             )
 
             p_info["Item"] = self.read_u32(
-                self.resolve_chain(0x809C3618, [0x14, 0xBC * n + 0x8C])
+                self.resolve_chain(0x809C3618, [0x14] + [0xBC] * n + [0x8C])
             )
             p_info["ItemNum"] = self.read_u32(
-                self.resolve_chain(0x809C3618, [0x14, 0xBC * n + 0x90])
+                self.resolve_chain(0x809C3618, [0x14] + [0xBC] * n + [0x90])
             )
             p_info["PassiveItem"] = self.read_u32(
-                self.resolve_chain(0x809C3618, [0x14, 0xBC * n + 0xCC])
+                self.resolve_chain(0x809C3618, [0x14] + [0xBC] * n + [0xCC])
             )
             p_info["PassiveItemNum"] = self.read_u32(
-                self.resolve_chain(0x809C3618, [0x14, 0xBC * n + 0x104])
+                self.resolve_chain(0x809C3618, [0x14] + [0xBC] * n + [0x104])
             )
 
             p_info["StarTimer"] = self.read_u16(
