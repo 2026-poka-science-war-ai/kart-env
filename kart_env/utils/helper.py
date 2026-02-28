@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 def free(env: KartEnvironment, num_frame: int = 1000):
     for _ in range(num_frame):
-        env.step({})
+        env._send_actions({})
 
 
 def exec_cmd(env: KartEnvironment, command: str):
