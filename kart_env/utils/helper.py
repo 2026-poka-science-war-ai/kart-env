@@ -49,6 +49,8 @@ def _launch_game_4p(env: KartEnvironment, options: OptionType):
 
     env.click({1: {"A": 1}}, num_frame=100)  # select VS Race in ["VS Race", "Battle"]
 
+    # TODO: setting rules (CC, CPU, etc.) in the future
+
     if options.race == RaceChoice.SOLO_RACE:
         env.click({1: {"A": 1}})
     elif options.race == RaceChoice.TEAM_RACE:
