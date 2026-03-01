@@ -112,7 +112,7 @@ class DolphinMem:
             p_info["CurrentLap"] = self.read_u16(
                 self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x24])
             )
-            p_info["MaxLap"] = self.read_u16(
+            p_info["MaxLap"] = self.read_u8(
                 self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x26])
             )
             p_info["currentKCP"] = self.read_u8(
@@ -207,7 +207,7 @@ class DolphinMem:
             p_info["WheelieFrameCount"] = self.read_u32(
                 self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x2A8])
             )
-            p_info["WheelieCooldownCount"] = self.read_u32(
+            p_info["WheelieCooldownCount"] = self.read_u16(
                 self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x2B6])
             )
             p_info["LeanRot"] = self.read_f32(
@@ -255,7 +255,7 @@ class DolphinMem:
                 self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0x1C])
             )
 
-            p_info["RacePosition"] = self.read_u32(
+            p_info["RacePosition"] = self.read_u8(
                 self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x18, 0x3C])
             )
             p_info["FloorCollisionCount"] = self.read_u16(
@@ -302,6 +302,12 @@ class DolphinMem:
                 self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x194])
             )
 
+            p_info["startBoostCharge"] = self.read_f32(
+                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0x9C])
+            )
+            p_info["startBoostIdx"] = self.read_u32(
+                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0xA0])
+            )
             obs["PLAYER_INFO"].append(p_info)
 
         return obs
