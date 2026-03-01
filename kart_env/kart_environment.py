@@ -104,7 +104,7 @@ class KartEnvironment(ParallelEnv):
             {
                 "A": spaces.Discrete(2),
                 "B": spaces.Discrete(2),
-                # "X": spaces.Discrete(2),
+                "X": spaces.Discrete(2),
                 # "Y": spaces.Discrete(2),
                 # "Z": spaces.Discrete(2),
                 # "Start": spaces.Discrete(2),
