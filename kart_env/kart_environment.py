@@ -92,6 +92,11 @@ class KartEnvironment(ParallelEnv):
         except Exception:
             pass
 
+    def click(self, actions: dict[AgentID, ActionType], num_frame: int = 250):
+        self._send_actions(actions)
+        for _ in range(num_frame):
+            self._send_actions({})
+
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent):  # type: ignore
         return spaces.Discrete(1)
