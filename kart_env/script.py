@@ -1,11 +1,12 @@
 from dolphin import event, gui, controller, savestate
 import socket
 import struct
+import os
 
-env_id = 0  # TODO support multiple envs
-PORT = 9999
+env_id = int(os.environ["ENV_ID"])
+port = 9999 + env_id
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("localhost", PORT))
+sock.connect(("localhost", port))
 
 GC_BUTTONS = ["A", "B", "X", "Y", "Z", "Start", "Up", "Down", "Left", "Right", "L", "R"]
 AGENT_STRUCT = "<H6f"

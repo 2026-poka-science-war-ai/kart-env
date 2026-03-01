@@ -179,6 +179,7 @@ class KartEnvironment(ParallelEnv):
         ]
         dolphin_env = os.environ.copy()
         dolphin_env["DISPLAY"] = f":{self.env_id}"
+        dolphin_env["ENV_ID"] = f"{self.env_id}"
         dolphin_process = subprocess.Popen(dolphin_command, env=dolphin_env)
         self.processes.append(dolphin_process)
 
