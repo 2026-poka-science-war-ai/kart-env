@@ -15,6 +15,7 @@ import numpy as np
 from .utils.dolphin_mem import DolphinMem
 from .utils.enums import *
 from .utils.helper import launch_game
+from .utils.macro_helper import OptionType
 
 ObsType = Dict[str, Any]
 ActionType = Dict[str, Any]
@@ -24,8 +25,11 @@ AgentID = int
 class KartEnvironment(ParallelEnv):
     metadata = {"name": "kart_environment"}
 
-    def __init__(self, env_id: int = 0):
-        self.possible_agents = [i for i in range(5)]
+    def __init__(self, env_id: int = 0, options: OptionType | None = None):
+        self.options = options if options is not None else OptionType()
+
+        # Agents are indexed from 1 to num_agents, index 0 is reserved for environment-level observations
+        self.possible_agents = [i for i in range(self.options.num_agents + 1)]
         self.agents = self.possible_agents
 
         self.env_id = env_id
@@ -40,7 +44,7 @@ class KartEnvironment(ParallelEnv):
         self.processes: list[subprocess.Popen] = []
         atexit.register(self.close)
         self._run_env()
-        launch_game(self)
+        launch_game(self, self.options)
         # TODO save memory state to fast reset
 
     def reset(
