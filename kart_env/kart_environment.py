@@ -45,14 +45,15 @@ class KartEnvironment(ParallelEnv):
         atexit.register(self.close)
         self._run_env()
         launch_game(self, self.options)
-        # TODO save memory state to fast reset
+        self.conn.sendall(b"save")
+        assert self.conn.recv(1024) == b"save_done"
 
     def reset(
         self, seed=None, options=None
     ) -> tuple[dict[AgentID, ObsType], dict[AgentID, dict]]:
 
         observations = {}
-        self.conn.sendall(b"reset")  # TODO load saved memory state
+        self.conn.sendall(b"reset")
         assert self.conn.recv(1024) == b"reset_done"
 
         vector_obs = self.mem.read_obs()

@@ -79,7 +79,7 @@ def _launch_game_4p(env: KartEnvironment, options: OptionType):
     env.click({1: {"A": 1}})  # Luigi Circuit
     env.click({1: {"A": 1}})  # OK
 
-    env.click({}, num_frame=1000)  # wait
+    env.click({}, num_frame=1250)  # wait
 
 
 def select_character(env: KartEnvironment, options: OptionType):
@@ -138,9 +138,7 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
         selected_character = coerce_choice(
             options.character[player_id], CharacterChoice
         )
-        selected_vehicle = coerce_choice(
-            options.vehicle[player_id], VehicleChoice
-        )
+        selected_vehicle = coerce_choice(options.vehicle[player_id], VehicleChoice)
 
         selected_vehicle_info = VehicleInfoMap[selected_vehicle]
         target_size = get_character_size(selected_character)
