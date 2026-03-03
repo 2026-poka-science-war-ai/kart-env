@@ -745,6 +745,42 @@ class CourseChoice(Enum):
     N64_BOWSERS_CASTLE = "N64 Bowser's Castle"
 
 
+CoursePositionMap = {
+    CourseChoice.LUIGI_CIRCUIT: 0,
+    CourseChoice.MOO_MOO_MEADOWS: 1,
+    CourseChoice.MUSHROOM_GORGE: 2,
+    CourseChoice.TOADS_FACTORY: 3,
+    CourseChoice.MARIO_CIRCUIT: 0,
+    CourseChoice.COCONUT_MALL: 1,
+    CourseChoice.DK_SUMMIT: 2,
+    CourseChoice.WARIOS_GOLD_MINE: 3,
+    CourseChoice.DAISY_CIRCUIT: 0,
+    CourseChoice.KOOPA_CAPE: 1,
+    CourseChoice.MAPLE_TREEWAY: 2,
+    CourseChoice.GRUMBLE_VOLCANO: 3,
+    CourseChoice.DRY_DRY_RUINS: 0,
+    CourseChoice.MOONVIEW_HIGHWAY: 1,
+    CourseChoice.BOWSERS_CASTLE: 2,
+    CourseChoice.RAINBOW_ROAD: 3,
+    CourseChoice.GCN_PEACH_BEACH: 0,
+    CourseChoice.DS_YOSHI_FALLS: 1,
+    CourseChoice.SNES_GHOST_VALLEY_2: 2,
+    CourseChoice.N64_MARIO_RACEWAY: 3,
+    CourseChoice.N64_SHERBET_LAND: 0,
+    CourseChoice.GBA_SHY_GUY_BEACH: 1,
+    CourseChoice.DS_DELFINO_SQUARE: 2,
+    CourseChoice.GCN_WALUIGI_STADIUM: 3,
+    CourseChoice.DS_DESERT_STREET: 0,
+    CourseChoice.GBA_BOWSER_CASTLE_3: 1,
+    CourseChoice.N64_DKS_JUNGLE_PARKWAY: 2,
+    CourseChoice.GCN_MARIO_CIRCUIT: 3,
+    CourseChoice.SNES_MARIO_CIRCUIT_3: 0,
+    CourseChoice.DS_PEACH_GARDENS: 1,
+    CourseChoice.GCN_DK_MOUNTAIN: 2,
+    CourseChoice.N64_BOWSERS_CASTLE: 3,
+}
+
+
 class CCChoice(Enum):
     CC_50 = "50cc"
     CC_100 = "100cc"

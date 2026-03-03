@@ -77,11 +77,9 @@ def _launch_game_4p(env: KartEnvironment, options: OptionType):
 
     select_cup(env, options)
 
-    # select_course(env, options) # TODO: IMPLEMENT CODE
-    env.click({1: {"A": 1}})  # Luigi Circuit
-    env.click({1: {"A": 1}})  # OK
+    select_course(env, options)
 
-    env.click({}, num_frame=1250)  # wait
+    env.click({}, num_frame=1250)
 
 
 def select_character(env: KartEnvironment, options: OptionType):
@@ -182,19 +180,20 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
 
 
 def select_cup(env: KartEnvironment, options: OptionType):
-    selected_choice = coerce_choice(options.cup, CupChoice)
+    target_row, target_col = CupPositionMap[options.cup]
 
-    start_row, start_col = CupPositionMap[CupChoice.MUSHROOM_CUP]
-    target_row, target_col = CupPositionMap[selected_choice]
-    row_shift = target_row - start_row
-    col_shift = target_col - start_col
+    for _ in range(target_row):
+        env.click({1: {"Down": 1}}, num_frame=10)
 
-    vertical_move_key = "Up" if row_shift <= 0 else "Down"
-    for _ in range(abs(row_shift)):
-        env.click({1: {vertical_move_key: 1}}, num_frame=10)
+    for _ in range(target_col):
+        env.click({1: {"Right": 1}}, num_frame=10)
 
-    horizontal_move_key = "Left" if col_shift <= 0 else "Right"
-    for _ in range(abs(col_shift)):
-        env.click({1: {horizontal_move_key: 1}}, num_frame=10)
+    env.click({1: {"A": 1}}, num_frame=50)
 
+
+def select_course(env: KartEnvironment, options: OptionType):
+    target_index = CoursePositionMap[options.course]
+    for _ in range(target_index):
+        env.click({1: {"Down": 1}}, num_frame=10)
+    env.click({1: {"A": 1}}, num_frame=50)
     env.click({1: {"A": 1}})
