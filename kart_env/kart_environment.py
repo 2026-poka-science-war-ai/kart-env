@@ -80,6 +80,17 @@ class KartEnvironment(ParallelEnv):
 
         vector_obs = self.mem.read_obs()
         # TODO combine graphic_obs and vector_obs into a single observation dict
+
+        for agent_id in self.agents:
+            if agent_id == 0:
+                continue
+            terminations[agent_id] = bool(
+                vector_obs["PLAYER_INFO"][agent_id - 1]["StateBit"] & 32
+            )
+        all_players_done = all(terminations[aid] for aid in self.agents if aid != 0)
+        if all_players_done:
+            terminations[0] = True
+
         return vector_obs  # type: ignore
 
         return observations, rewards, terminations, truncations, infos
