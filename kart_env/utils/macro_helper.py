@@ -625,8 +625,8 @@ VehicleChoiceGrid = {
             ),
             (
                 VehicleChoice.TURBO_BLOOPER,
-                VehicleChoice.ROYAL_RACER,
                 VehicleChoice.B_DASHER_MK_2,
+                VehicleChoice.ROYAL_RACER,
             ),
         ),
         VehicleType.BIKE: (
@@ -665,6 +665,53 @@ VehicleChoiceGrid = {
         ),
     },
 }
+
+
+VehicleChoiceQueue = {
+    VehicleSize.SMALL: [
+        VehicleChoice.STANDARD_KART_S,
+        VehicleChoice.BABY_BOOSTER,
+        VehicleChoice.CONCERTO,
+        VehicleChoice.CHEEP_CHARGER,
+        VehicleChoice.RALLY_ROMPER,
+        VehicleChoice.BLUE_FALCON,
+        VehicleChoice.STANDARD_BIKE_S,
+        VehicleChoice.BULLET_BIKE,
+        VehicleChoice.NANOBIKE,
+        VehicleChoice.QUACKER,
+        VehicleChoice.MAGIKRUISER,
+        VehicleChoice.BUBBLE_BIKE,
+    ],
+    VehicleSize.MEDIUM: [
+        VehicleChoice.STANDARD_KART_M,
+        VehicleChoice.NOSTALGIA_1,
+        VehicleChoice.WILD_WING,
+        VehicleChoice.TURBO_BLOOPER,
+        VehicleChoice.ROYAL_RACER,
+        VehicleChoice.B_DASHER_MK_2,
+        VehicleChoice.STANDARD_BIKE_M,
+        VehicleChoice.MACH_BIKE,
+        VehicleChoice.BON_BON,
+        VehicleChoice.RAPIDE,
+        VehicleChoice.NITROCYCLE,
+        VehicleChoice.DOLPHIN_DASHER,
+    ],
+    VehicleSize.LARGE: [
+        VehicleChoice.STANDARD_KART_L,
+        VehicleChoice.OFFROADER,
+        VehicleChoice.FLAME_FLYER,
+        VehicleChoice.PIRANHA_PROWLER,
+        VehicleChoice.AERO_GLIDER,
+        VehicleChoice.DRAGONETTI,
+        VehicleChoice.STANDARD_BIKE_L,
+        VehicleChoice.BOWSER_BIKE,
+        VehicleChoice.WARIO_BIKE,
+        VehicleChoice.TWINKLE_STAR,
+        VehicleChoice.TORPEDO,
+        VehicleChoice.PHANTOM,
+    ],
+}
+
 
 VehiclePositionMap = {
     vehicle_choice: (row, col)
