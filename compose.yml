@@ -13,6 +13,7 @@ services:
       - ./src:/kart_env/src
       - ./main.py:/workspace/main.py
       - ./MarioKartWii.iso:/workspace/MarioKartWii.iso:ro
+      - ./users:/workspace/users
     ipc: host
     ulimits:
       memlock: -1
