@@ -835,7 +835,7 @@ class CCChoice(Enum):
     MIRROR = "mirror"
 
 
-@dataclass(frozen=True)
+@dataclass
 class OptionType:
     num_agents: int = 4
     is_license_created: bool = True

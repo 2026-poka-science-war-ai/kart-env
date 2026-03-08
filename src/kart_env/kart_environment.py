@@ -41,6 +41,7 @@ class KartEnvironment(ParallelEnv):
         if not self.user_dir.exists():
             dolphin_settings_path = pathlib.Path(__file__).parent / "dolphin_settings"
             shutil.copytree(dolphin_settings_path, self.user_dir)
+            self.options.is_license_created = False
 
         self.processes: list[subprocess.Popen] = []
         atexit.register(self.close)
