@@ -62,12 +62,22 @@ class KartEnvironment(ParallelEnv):
             self.load_slot(0)
 
         observations = {}
+        infos = {}
 
-        vector_obs = self.mem.read_obs()
+        raw_vector_obs = self.mem.read_obs()
+
+        for agent_id in self.agents:
+            observation = {
+                "RACE_INFO": raw_vector_obs["RACE_INFO"],
+                "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
+            }
+            observations[agent_id] = observation
+
+            infos[agent_id] = {}
+
         # TODO combine graphic_obs and vector_obs into a single observation dict
-        # return vector_obs  # type: ignore
 
-        return ({}, {})
+        return observations, infos
 
     def step(self, actions: dict[AgentID, ActionType]) -> tuple[
         dict[AgentID, ObsType],
@@ -85,18 +95,23 @@ class KartEnvironment(ParallelEnv):
 
         self._send_actions(actions)
 
-        vector_obs = self.mem.read_obs()
-        # TODO combine graphic_obs and vector_obs into a single observation dict
+        raw_vector_obs = self.mem.read_obs()
 
         for agent_id in self.agents:
-            observations[agent_id] = {}
-            rewards[agent_id] = 0.0
-            termination = bool(vector_obs["PLAYER_INFO"][agent_id]["StateBit"] & 32)
-            terminations[agent_id] = termination
-            truncations[agent_id] = False
-            infos[agent_id] = {}
+            observation = {
+                "RACE_INFO": raw_vector_obs["RACE_INFO"],
+                "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
+            }
+            observations[agent_id] = observation
 
-        # return vector_obs  # type: ignore
+            rewards[agent_id] = 0.0
+
+            termination = bool(raw_vector_obs["PLAYER_INFO"][agent_id]["StateBit"] & 32)
+            terminations[agent_id] = termination
+
+            truncations[agent_id] = False
+
+            infos[agent_id] = {}
 
         return observations, rewards, terminations, truncations, infos
 
