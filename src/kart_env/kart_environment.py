@@ -36,10 +36,11 @@ class KartEnvironment(ParallelEnv):
         self.vnc_port = VNC_BASE + env_id
         self.novnc_port = NOVNC_BASE + env_id
         self.sock_port = SOCK_BASE + env_id
-        self.user_dir = pathlib.Path(USER_BASE) / str(env_id)
+        self.user_dir = pathlib.Path("users") / str(env_id)
 
         if not self.user_dir.exists():
-            shutil.copytree(DOLPHIN_SETTINGS_PATH, self.user_dir)
+            dolphin_settings_path = pathlib.Path(__file__).parent / "dolphin_settings"
+            shutil.copytree(dolphin_settings_path, self.user_dir)
 
         self.processes: list[subprocess.Popen] = []
         atexit.register(self.close)
@@ -177,6 +178,7 @@ class KartEnvironment(ParallelEnv):
         ]
         self.processes.append(subprocess.Popen(websockify_command))
 
+        script_path = pathlib.Path(__file__).parent / "script.py"
         dolphin_command = [
             "vglrun",
             "-d",
@@ -185,9 +187,9 @@ class KartEnvironment(ParallelEnv):
             "--batch",
             f"--user={self.user_dir}",
             "-e",
-            ISO_PATH,
+            "MarioKartWii.iso",
             "--script",
-            f"{SCRIPT_PATH}",
+            script_path,
         ]
         dolphin_env = os.environ.copy()
         dolphin_env["DISPLAY"] = f":{self.env_id}"

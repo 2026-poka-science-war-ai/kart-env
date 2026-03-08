@@ -1,7 +1,5 @@
 FROM pytorch/pytorch:2.10.0-cuda12.8-cudnn9-devel
 
-WORKDIR /kart_env
-
 RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     sed -i 's/security.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     apt-get update && \
@@ -117,8 +115,16 @@ RUN cd /dolphin-src && \
     cd / && rm -rf /dolphin-src
 
 RUN uv venv /opt/venv
+ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-COPY requirements.txt .
-RUN uv pip install -r requirements.txt && rm requirements.txt
+
+WORKDIR /kart_env
+COPY pyproject.toml .
+RUN uv pip install -r pyproject.toml
+COPY src .python-version uv.lock .
+RUN uv pip install -e .
 
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
+
+WORKDIR /workspace
+COPY main.py .

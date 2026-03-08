@@ -10,7 +10,9 @@ services:
     ports:
       - "6080-6091:6080-6091" # Assume we use 12 clients in a container
     volumes:
-      - .:/kart_env
+      - ./src:/kart_env/src
+      - ./main.py:/workspace/main.py
+      - ./MarioKartWii.iso:/workspace/MarioKartWii.iso:ro
     ipc: host
     ulimits:
       memlock: -1
