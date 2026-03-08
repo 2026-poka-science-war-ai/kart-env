@@ -839,7 +839,7 @@ class CCChoice(Enum):
 class OptionType:
     num_agents: int = 4
     is_license_created: bool = True
-    race: RaceChoice = RaceChoice.TEAM_RACE
+    race: RaceChoice = RaceChoice.SOLO_RACE
     character: list[CharacterChoice] = field(
         default_factory=lambda: [
             CharacterChoice.MARIO,
