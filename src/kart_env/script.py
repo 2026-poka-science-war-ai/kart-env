@@ -43,10 +43,6 @@ while True:
         await event.frameadvance()
         sock.sendall(b"step_done")
 
-    elif data.startswith(b"reset"):
-        savestate.load_from_slot(0)
-        sock.sendall(b"reset_done")
-
     elif data.startswith(b"close"):
         sock.close()
         break
@@ -54,9 +50,29 @@ while True:
     elif data.startswith(b"exec"):
         exec(payload.decode())
 
-    elif data.startswith(b"save"):
-        savestate.save_to_slot(0)
+    elif data.startswith(b"savefile"):
+        payload = data[8:]
+        path = payload.decode()
+        savestate.save_to_file(path)
         sock.sendall(b"save_done")
+
+    elif data.startswith(b"saveslot"):
+        payload = data[8:]
+        slot = int(payload.decode())
+        savestate.save_to_slot(slot)
+        sock.sendall(b"save_done")
+
+    elif data.startswith(b"loadfile"):
+        payload = data[8:]
+        path = payload.decode()
+        savestate.load_from_file(path)
+        sock.sendall(b"load_done")
+
+    elif data.startswith(b"loadslot"):
+        payload = data[8:]
+        slot = int(payload.decode())
+        savestate.load_from_slot(slot)
+        sock.sendall(b"load_done")
 
     frame_counter += 1
     # draw on screen

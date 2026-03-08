@@ -47,16 +47,22 @@ class KartEnvironment(ParallelEnv):
         atexit.register(self.close)
         self._run_env()
         launch_game(self, self.options)
-        self.conn.sendall(b"save")
-        assert self.conn.recv(1024) == b"save_done"
+        self.save_slot(0)
 
     def reset(
-        self, seed=None, options=None
+        self, seed=None, options: dict | None = {}
     ) -> tuple[dict[AgentID, ObsType], dict[AgentID, dict]]:
+        if options is None:
+            options = {}
+
+        if options.get("slot") is not None:
+            self.load_slot(options["slot"])
+        elif options.get("file") is not None:
+            self.load_file(options["file"])
+        else:
+            self.load_slot(0)
 
         observations = {}
-        self.conn.sendall(b"reset")
-        assert self.conn.recv(1024) == b"reset_done"
 
         vector_obs = self.mem.read_obs()
         # TODO combine graphic_obs and vector_obs into a single observation dict
@@ -114,6 +120,22 @@ class KartEnvironment(ParallelEnv):
         self._send_actions(actions)
         for _ in range(num_frame):
             self._send_actions({})
+
+    def save_file(self, path: str):
+        self.conn.sendall(b"savefile" + path.encode())
+        assert self.conn.recv(1024) == b"save_done"
+
+    def save_slot(self, slot: int):
+        self.conn.sendall(b"saveslot" + str(slot).encode())
+        assert self.conn.recv(1024) == b"save_done"
+
+    def load_file(self, path: str):
+        self.conn.sendall(b"loadfile" + path.encode())
+        assert self.conn.recv(1024) == b"load_done"
+
+    def load_slot(self, slot: int):
+        self.conn.sendall(b"loadslot" + str(slot).encode())
+        assert self.conn.recv(1024) == b"load_done"
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent):  # type: ignore
