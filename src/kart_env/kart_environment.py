@@ -60,7 +60,7 @@ class KartEnvironment(ParallelEnv):
 
         vector_obs = self.mem.read_obs()
         # TODO combine graphic_obs and vector_obs into a single observation dict
-        return vector_obs  # type: ignore
+        # return vector_obs  # type: ignore
 
         return ({}, {})
 
@@ -93,7 +93,7 @@ class KartEnvironment(ParallelEnv):
         if all_players_done:
             terminations[0] = True
 
-        return vector_obs  # type: ignore
+        # return vector_obs  # type: ignore
 
         return observations, rewards, terminations, truncations, infos
 
