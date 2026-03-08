@@ -28,8 +28,7 @@ class KartEnvironment(ParallelEnv):
     def __init__(self, env_id: int = 0, options: OptionType | None = None):
         self.options = options if options is not None else OptionType()
 
-        # Agents are indexed from 1 to num_agents, index 0 is reserved for environment-level observations
-        self.possible_agents = [i for i in range(self.options.num_agents + 1)]
+        self.possible_agents = [i for i in range(self.options.num_agents)]
         self.agents = self.possible_agents
 
         self.env_id = env_id
@@ -90,14 +89,12 @@ class KartEnvironment(ParallelEnv):
         # TODO combine graphic_obs and vector_obs into a single observation dict
 
         for agent_id in self.agents:
-            if agent_id == 0:
-                continue
-            terminations[agent_id] = bool(
-                vector_obs["PLAYER_INFO"][agent_id - 1]["StateBit"] & 32
-            )
-        all_players_done = all(terminations[aid] for aid in self.agents if aid != 0)
-        if all_players_done:
-            terminations[0] = True
+            observations[agent_id] = {}
+            rewards[agent_id] = 0.0
+            termination = bool(vector_obs["PLAYER_INFO"][agent_id]["StateBit"] & 32)
+            terminations[agent_id] = termination
+            truncations[agent_id] = False
+            infos[agent_id] = {}
 
         # return vector_obs  # type: ignore
 
@@ -143,8 +140,6 @@ class KartEnvironment(ParallelEnv):
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent):  # type: ignore
-        if agent == 0:
-            return spaces.Discrete(1)
         return spaces.Dict(
             {
                 "A": spaces.Discrete(2),
@@ -225,7 +220,7 @@ class KartEnvironment(ParallelEnv):
 
     def _pack_actions(self, actions: dict[AgentID, ActionType]) -> bytes:
         data = []
-        for i in range(1, 5):
+        for i in range(len(self.agents)):
             action = NEUTRAL_ACTION.copy()
             if i in actions:
                 action.update(actions[i])

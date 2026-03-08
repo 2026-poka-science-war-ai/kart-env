@@ -26,52 +26,52 @@ def launch_game(env: KartEnvironment, options: OptionType):
 
 def enter_main_menu(env: KartEnvironment, options: OptionType) -> None:
     env.click({}, num_frame=500)
-    env.click({1: {"A": 1}}, num_frame=500)
+    env.click({0: {"A": 1}}, num_frame=500)
 
     if options.is_license_created:
         for _ in range(2):
-            env.click({1: {"A": 1}})
+            env.click({0: {"A": 1}})
     else:
         for _ in range(7):
-            env.click({1: {"A": 1}})
+            env.click({0: {"A": 1}})
 
 
 def _launch_game_4p(env: KartEnvironment, options: OptionType):
     for _ in range(3):
-        env.click({1: {"Right": 1}}, num_frame=10)
-    env.click({1: {"A": 1}})
+        env.click({0: {"Right": 1}}, num_frame=10)
+    env.click({0: {"A": 1}})
 
+    env.click({1: {"A": 1}}, num_frame=10)
     env.click({2: {"A": 1}}, num_frame=10)
     env.click({3: {"A": 1}}, num_frame=10)
-    env.click({4: {"A": 1}}, num_frame=10)
     env.click({}, num_frame=50)
-    env.click({1: {"A": 1}}, num_frame=100)
+    env.click({0: {"A": 1}}, num_frame=100)
 
-    env.click({1: {"A": 1}}, num_frame=100)  # select VS Race in ["VS Race", "Battle"]
+    env.click({0: {"A": 1}}, num_frame=100)  # select VS Race in ["VS Race", "Battle"]
 
     # TODO: setting rules (CC, CPU, etc.) in the future
 
     if options.race == RaceChoice.SOLO_RACE:
-        env.click({1: {"A": 1}})
+        env.click({0: {"A": 1}})
     elif options.race == RaceChoice.TEAM_RACE:
-        env.click({1: {"Down": 1}}, num_frame=10)
-        env.click({1: {"A": 1}})
+        env.click({0: {"Down": 1}}, num_frame=10)
+        env.click({0: {"A": 1}})
 
     select_character(env, options)
 
     if options.race == RaceChoice.TEAM_RACE:
         # Team select (1, 3p select red team, 2, 4p select green team)
-        env.click({1: {"A": 1}, 2: {"A": 1}, 3: {"A": 1}, 4: {"A": 1}})
-        env.click({1: {"A": 1}})
+        env.click({0: {"A": 1}, 1: {"A": 1}, 2: {"A": 1}, 3: {"A": 1}})
+        env.click({0: {"A": 1}})
 
     select_vehicle(env, options)
 
     for i in range(options.num_agents):
         if options.drift_modes[i] == DriftModeChoice.AUTOMATIC:
-            env.click({i + 1: {"A": 1}}, num_frame=10)
+            env.click({i: {"A": 1}}, num_frame=10)
         elif options.drift_modes[i] == DriftModeChoice.MANUAL:
-            env.click({i + 1: {"Down": 1}}, num_frame=10)
-            env.click({i + 1: {"A": 1}}, num_frame=10)
+            env.click({i: {"Down": 1}}, num_frame=10)
+            env.click({i: {"A": 1}}, num_frame=10)
     env.click({})
 
     select_cup(env, options)
@@ -83,33 +83,33 @@ def _launch_game_4p(env: KartEnvironment, options: OptionType):
 
 def select_character(env: KartEnvironment, options: OptionType):
     if options.num_agents >= 4:
-        env.click({4: {"Down": 1}}, num_frame=10)
-        env.click({4: {"Down": 1}}, num_frame=10)
-        env.click({4: {"Down": 1}}, num_frame=10)
-        env.click({4: {"Down": 1}}, num_frame=10)
-        env.click({4: {"Right": 1}}, num_frame=10)
+        env.click({3: {"Down": 1}}, num_frame=10)
+        env.click({3: {"Down": 1}}, num_frame=10)
+        env.click({3: {"Down": 1}}, num_frame=10)
+        env.click({3: {"Down": 1}}, num_frame=10)
+        env.click({3: {"Right": 1}}, num_frame=10)
     if options.num_agents >= 3:
-        env.click({3: {"Right": 1}}, num_frame=10)
-        env.click({3: {"Right": 1}}, num_frame=10)
-        env.click({3: {"Down": 1}}, num_frame=10)
-        env.click({3: {"Down": 1}}, num_frame=10)
-        env.click({3: {"Down": 1}}, num_frame=10)
-        env.click({3: {"Right": 1}}, num_frame=10)
+        env.click({2: {"Right": 1}}, num_frame=10)
+        env.click({2: {"Right": 1}}, num_frame=10)
+        env.click({2: {"Down": 1}}, num_frame=10)
+        env.click({2: {"Down": 1}}, num_frame=10)
+        env.click({2: {"Down": 1}}, num_frame=10)
+        env.click({2: {"Right": 1}}, num_frame=10)
     if options.num_agents >= 2:
-        env.click({2: {"Right": 1}}, num_frame=10)
-        env.click({2: {"Down": 1}}, num_frame=10)
-        env.click({2: {"Down": 1}}, num_frame=10)
-        env.click({2: {"Down": 1}}, num_frame=10)
-        env.click({2: {"Down": 1}}, num_frame=10)
-        env.click({2: {"Right": 1}}, num_frame=10)
+        env.click({1: {"Right": 1}}, num_frame=10)
+        env.click({1: {"Down": 1}}, num_frame=10)
+        env.click({1: {"Down": 1}}, num_frame=10)
+        env.click({1: {"Down": 1}}, num_frame=10)
+        env.click({1: {"Down": 1}}, num_frame=10)
+        env.click({1: {"Right": 1}}, num_frame=10)
     if options.num_agents >= 1:
-        env.click({1: {"Right": 1}}, num_frame=10)
-        env.click({1: {"Right": 1}}, num_frame=10)
-        env.click({1: {"Down": 1}}, num_frame=10)
-        env.click({1: {"Down": 1}}, num_frame=10)
-        env.click({1: {"Down": 1}}, num_frame=10)
-        env.click({1: {"Down": 1}}, num_frame=10)
-        env.click({1: {"Right": 1}}, num_frame=10)
+        env.click({0: {"Right": 1}}, num_frame=10)
+        env.click({0: {"Right": 1}}, num_frame=10)
+        env.click({0: {"Down": 1}}, num_frame=10)
+        env.click({0: {"Down": 1}}, num_frame=10)
+        env.click({0: {"Down": 1}}, num_frame=10)
+        env.click({0: {"Down": 1}}, num_frame=10)
+        env.click({0: {"Right": 1}}, num_frame=10)
 
     selected_coordinate = []
     selected_choices = []
@@ -122,10 +122,10 @@ def select_character(env: KartEnvironment, options: OptionType):
     for i, _ in sorted(selected_choices, key=lambda x: x[1]):
         row, col = selected_coordinate[i]
         for _ in range(6 - row):
-            env.click({i + 1: {"Up": 1}}, num_frame=10)
+            env.click({i: {"Up": 1}}, num_frame=10)
         for _ in range(3 - col):
-            env.click({i + 1: {"Left": 1}}, num_frame=10)
-        env.click({i + 1: {"A": 1}}, num_frame=10)
+            env.click({i: {"Left": 1}}, num_frame=10)
+        env.click({i: {"A": 1}}, num_frame=10)
 
     env.click({})
 
@@ -168,24 +168,24 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
 
             vertical_move_key = "Up" if row_shift <= 0 else "Down"
             for _ in range(abs(row_shift)):
-                env.click({player_id + 1: {vertical_move_key: 1}}, num_frame=10)
+                env.click({player_id: {vertical_move_key: 1}}, num_frame=10)
 
             horizontal_move_key = "Left" if col_shift <= 0 else "Right"
             for _ in range(abs(col_shift)):
-                env.click({player_id + 1: {horizontal_move_key: 1}}, num_frame=10)
-            env.click({player_id + 1: {"A": 1}}, num_frame=150)
+                env.click({player_id: {horizontal_move_key: 1}}, num_frame=10)
+            env.click({player_id: {"A": 1}}, num_frame=150)
 
         else:
             success = False
             vehicle_queue = VehicleChoiceQueue[target_size]
             for vehicle in vehicle_queue:
-                env.click({player_id + 1: {}}, num_frame=10)
+                env.click({player_id: {}}, num_frame=10)
                 if vehicle == selected_vehicle:
-                    env.click({player_id + 1: {"A": 1}}, num_frame=150)
+                    env.click({player_id: {"A": 1}}, num_frame=150)
                     success = True
                     break
                 else:
-                    env.click({player_id + 1: {"Right": 1}}, num_frame=10)
+                    env.click({player_id: {"Right": 1}}, num_frame=10)
             if not success:
                 raise ValueError(
                     f"{selected_vehicle.value} not found in selection queue. Please check the vehicle choice and queue configuration."
@@ -196,17 +196,17 @@ def select_cup(env: KartEnvironment, options: OptionType):
     target_row, target_col = CupPositionMap[options.cup]
 
     for _ in range(target_row):
-        env.click({1: {"Down": 1}}, num_frame=10)
+        env.click({0: {"Down": 1}}, num_frame=10)
 
     for _ in range(target_col):
-        env.click({1: {"Right": 1}}, num_frame=10)
+        env.click({0: {"Right": 1}}, num_frame=10)
 
-    env.click({1: {"A": 1}}, num_frame=50)
+    env.click({0: {"A": 1}}, num_frame=50)
 
 
 def select_course(env: KartEnvironment, options: OptionType):
     target_index = CoursePositionMap[options.course]
     for _ in range(target_index):
-        env.click({1: {"Down": 1}}, num_frame=10)
-    env.click({1: {"A": 1}}, num_frame=50)
-    env.click({1: {"A": 1}})
+        env.click({0: {"Down": 1}}, num_frame=10)
+    env.click({0: {"A": 1}}, num_frame=50)
+    env.click({0: {"A": 1}})
