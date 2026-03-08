@@ -119,9 +119,9 @@ ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /kart_env
-COPY pyproject.toml .
+COPY pyproject.toml uv.lock .python-version ./
 RUN uv pip install -r pyproject.toml
-COPY src .python-version uv.lock .
+COPY src ./src
 RUN uv pip install -e .
 
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
