@@ -7,7 +7,6 @@ import subprocess
 import os
 import shutil
 import time
-import atexit
 import socket
 import struct
 import numpy as np
@@ -27,6 +26,7 @@ class KartEnvironment(ParallelEnv):
 
     def __init__(self, env_id: int = 0, options: OptionType | None = None):
         self.options = options if options is not None else OptionType()
+        self._closed = False
 
         self.possible_agents = [i for i in range(self.options.num_agents)]
         self.agents = self.possible_agents
@@ -43,10 +43,12 @@ class KartEnvironment(ParallelEnv):
             self.options.is_license_created = False
 
         self.processes: list[subprocess.Popen] = []
-        atexit.register(self.close)
         self._run_env()
         launch_game(self, self.options)
         self.save_slot(0)
+
+    def __del__(self):
+        self.close()
 
     def reset(
         self, seed=None, options: dict | None = {}
@@ -116,6 +118,10 @@ class KartEnvironment(ParallelEnv):
         return observations, rewards, terminations, truncations, infos
 
     def close(self):
+        if self._closed:
+            return
+        self.closed = True
+
         self.conn.sendall(b"close")
         self.conn.close()
         self.server_sock.close()
