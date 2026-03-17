@@ -12,6 +12,7 @@ import struct
 import numpy as np
 
 from .utils.dolphin_mem import DolphinMem
+from .utils.kart_graphic_obs import KartGraphicObs, save_graphic_obs
 from .utils.enums import *
 from .utils.helper import launch_game
 from .utils.macro_helper import OptionType
@@ -45,6 +46,7 @@ class KartEnvironment(ParallelEnv):
         self.processes: list[subprocess.Popen] = []
         self._run_env()
         launch_game(self, self.options)
+        self.graphic_obs = KartGraphicObs(self.env_id)
         self.save_slot(0)
 
     def __del__(self):
@@ -67,6 +69,8 @@ class KartEnvironment(ParallelEnv):
         infos = {}
 
         raw_vector_obs = self.mem.read_obs()
+        raw_graphic_obs = self.graphic_obs.get() # TODO give graphic obs correctly
+        save_graphic_obs(raw_graphic_obs) # for DEBUG
 
         for agent_id in self.agents:
             observation = {
@@ -98,6 +102,8 @@ class KartEnvironment(ParallelEnv):
         self._send_actions(actions)
 
         raw_vector_obs = self.mem.read_obs()
+        raw_graphic_obs = self.graphic_obs.get() # TODO give graphic obs correctly
+        save_graphic_obs(raw_graphic_obs) # for DEBUG
 
         for agent_id in self.agents:
             observation = {
@@ -122,6 +128,7 @@ class KartEnvironment(ParallelEnv):
             return
         self.closed = True
 
+        self.graphic_obs.close()
         self.conn.sendall(b"close")
         self.conn.close()
         self.server_sock.close()
