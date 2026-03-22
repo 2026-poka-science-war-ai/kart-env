@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import NamedTuple, TypeVar
-from dataclasses import dataclass, field
+
+from pydantic import BaseModel, Field
 
 
 class RaceChoice(Enum):
@@ -835,12 +836,13 @@ class CCChoice(Enum):
     MIRROR = "mirror"
 
 
-@dataclass
-class OptionType:
+class OptionType(BaseModel):
+    model_config = {"frozen": False, "arbitrary_types_allowed": True}
+
     num_agents: int = 4
     is_license_created: bool = True
     race: RaceChoice = RaceChoice.SOLO_RACE
-    character: list[CharacterChoice] = field(
+    character: list[CharacterChoice] = Field(
         default_factory=lambda: [
             CharacterChoice.MARIO,
             CharacterChoice.LUIGI,
@@ -848,10 +850,10 @@ class OptionType:
             CharacterChoice.PEACH,
         ]
     )
-    vehicle: list[VehicleChoice] = field(
+    vehicle: list[VehicleChoice] = Field(
         default_factory=lambda: [VehicleChoice.STANDARD_KART_M] * 4
     )
-    drift_modes: list[DriftModeChoice] = field(
+    drift_modes: list[DriftModeChoice] = Field(
         default_factory=lambda: [DriftModeChoice.MANUAL] * 4
     )
     cup: CupChoice = CupChoice.MUSHROOM_CUP

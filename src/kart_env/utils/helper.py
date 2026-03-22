@@ -1,16 +1,34 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
-from .macro_helper import *
+
+from .macro_helper import (
+    CCChoice,
+    CharacterChoice,
+    CharacterPositionMap,
+    CupPositionMap,
+    CoursePositionMap,
+    DriftModeChoice,
+    OptionType,
+    RaceChoice,
+    VehicleChoice,
+    VehicleChoiceQueue,
+    VehicleInfoMap,
+    VehiclePositionMap,
+    coerce_choice,
+    get_allowed_vehicle_types,
+    get_character_size,
+)
 
 if TYPE_CHECKING:
     from ..kart_environment import KartEnvironment
 
 
-def exec_cmd(env: KartEnvironment, command: str):
+def exec_cmd(env: KartEnvironment, command: str) -> None:
     env.conn.sendall(b"exec" + command.encode())
 
 
-def launch_game(env: KartEnvironment, options: OptionType):
+def launch_game(env: KartEnvironment, options: OptionType) -> None:
     enter_main_menu(env, options)
 
     match options.num_agents:
@@ -81,7 +99,7 @@ def _launch_game_4p(env: KartEnvironment, options: OptionType):
     env.click({}, num_frame=1250)
 
 
-def select_character(env: KartEnvironment, options: OptionType):
+def select_character(env: KartEnvironment, options: OptionType) -> None:
     if options.num_agents >= 4:
         env.click({3: {"Down": 1}}, num_frame=10)
         env.click({3: {"Down": 1}}, num_frame=10)
@@ -130,7 +148,7 @@ def select_character(env: KartEnvironment, options: OptionType):
     env.click({})
 
 
-def select_vehicle(env: KartEnvironment, options: OptionType):
+def select_vehicle(env: KartEnvironment, options: OptionType) -> None:
     selected_class = coerce_choice(options.cc, CCChoice)
 
     for player_id in range(options.num_agents):
@@ -143,7 +161,7 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
         target_size = get_character_size(selected_character)
         allowed_types = get_allowed_vehicle_types(selected_class)
 
-        if selected_vehicle_info.size is not target_size:
+        if selected_vehicle_info.size != target_size:
             raise ValueError(
                 f"{selected_vehicle.value} is {selected_vehicle_info.size.value} size, "
                 f"but {selected_character.value} is {target_size.value} size."
@@ -168,11 +186,11 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
 
             vertical_move_key = "Up" if row_shift <= 0 else "Down"
             for _ in range(abs(row_shift)):
-                env.click({player_id: {vertical_move_key: 1}}, num_frame=10)
+                env.click({player_id: {vertical_move_key: 1}}, num_frame=10)  # type: ignore[dict-item]
 
             horizontal_move_key = "Left" if col_shift <= 0 else "Right"
             for _ in range(abs(col_shift)):
-                env.click({player_id: {horizontal_move_key: 1}}, num_frame=10)
+                env.click({player_id: {horizontal_move_key: 1}}, num_frame=10)  # type: ignore[dict-item]
             env.click({player_id: {"A": 1}}, num_frame=150)
 
         else:
@@ -192,7 +210,7 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
                 )
 
 
-def select_cup(env: KartEnvironment, options: OptionType):
+def select_cup(env: KartEnvironment, options: OptionType) -> None:
     target_row, target_col = CupPositionMap[options.cup]
 
     for _ in range(target_row):
@@ -204,7 +222,7 @@ def select_cup(env: KartEnvironment, options: OptionType):
     env.click({0: {"A": 1}}, num_frame=50)
 
 
-def select_course(env: KartEnvironment, options: OptionType):
+def select_course(env: KartEnvironment, options: OptionType) -> None:
     target_index = CoursePositionMap[options.course]
     for _ in range(target_index):
         env.click({0: {"Down": 1}}, num_frame=10)

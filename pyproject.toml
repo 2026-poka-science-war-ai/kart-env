@@ -7,4 +7,5 @@ requires-python = ">=3.12"
 dependencies = [
     "pettingzoo==1.25.0",
     "pillow",
+    "pydantic>=2.12.5",
 ]

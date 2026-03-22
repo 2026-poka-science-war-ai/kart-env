@@ -1,25 +1,44 @@
+from __future__ import annotations
+
 import functools
-from pettingzoo import ParallelEnv
-from gymnasium import spaces
-import pathlib
-from typing import Any, Dict
-import subprocess
 import os
+import pathlib
 import shutil
-import time
 import socket
 import struct
-import numpy as np
+import subprocess
+import time
+from typing import Any
 
-from .utils.dolphin_mem import DolphinMem
-from .utils.kart_graphic_obs import KartGraphicObs, save_graphic_obs
-from .utils.enums import *
+import numpy as np
+from gymnasium import spaces
+from pettingzoo import ParallelEnv
+
+from .utils.dolphin_mem import DolphinMem, ObservationDict
+from .utils.enums import (
+    DOLPHIN_PATH,
+    GC_BUTTONS,
+    GcAction,
+    NEUTRAL_ACTION,
+    NOVNC_BASE,
+    SOCK_BASE,
+    VNC_BASE,
+)
+from .utils.kart_graphic_obs import KartGraphicObs
 from .utils.helper import launch_game
 from .utils.macro_helper import OptionType
 
-ObsType = Dict[str, Any]
-ActionType = Dict[str, Any]
 AgentID = int
+ObsType = dict[str, Any]
+ActionType = GcAction
+
+# Pre-compiled struct for packing 4-player actions (H + 6f per player * 4)
+_ACTION_STRUCT = struct.Struct("<" + "H6f" * 4)
+
+# Pre-computed payload for neutral (no-input) frames — avoids packing on every idle frame
+_NEUTRAL_STEP_PAYLOAD = b"step" + _ACTION_STRUCT.pack(
+    *(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0) * 4
+)
 
 
 class KartEnvironment(ParallelEnv):
@@ -29,7 +48,7 @@ class KartEnvironment(ParallelEnv):
         self.options = options if options is not None else OptionType()
         self._closed = False
 
-        self.possible_agents = [i for i in range(self.options.num_agents)]
+        self.possible_agents = list(range(self.options.num_agents))
         self.agents = self.possible_agents
 
         self.env_id = env_id
@@ -49,12 +68,12 @@ class KartEnvironment(ParallelEnv):
         self.graphic_obs = KartGraphicObs(self.env_id)
         self.save_slot(0)
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.close()
 
     def reset(
-        self, seed=None, options: dict | None = {}
-    ) -> tuple[dict[AgentID, ObsType], dict[AgentID, dict]]:
+        self, seed: int | None = None, options: dict[str, Any] | None = None,
+    ) -> tuple[dict[AgentID, ObsType], dict[AgentID, dict[str, Any]]]:
         if options is None:
             options = {}
 
@@ -65,24 +84,11 @@ class KartEnvironment(ParallelEnv):
         else:
             self.load_slot(0)
 
-        observations = {}
-        infos = {}
-
         raw_vector_obs = self.mem.read_obs()
-        raw_graphic_obs = self.graphic_obs.get() # TODO give graphic obs correctly
-        # save_graphic_obs(raw_graphic_obs) # for DEBUG
+        raw_graphic_obs = self.graphic_obs.get()
 
-        for agent_id in self.agents:
-            observation = {
-                "RACE_INFO": raw_vector_obs["RACE_INFO"],
-                "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
-                "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3 + agent_id]),
-            }
-            observations[agent_id] = observation
-
-            infos[agent_id] = {}
-
-        # TODO combine graphic_obs and vector_obs into a single observation dict
+        observations = self._build_observations(raw_vector_obs, raw_graphic_obs)
+        infos: dict[AgentID, dict[str, Any]] = {aid: {} for aid in self.agents}
 
         return observations, infos
 
@@ -93,39 +99,28 @@ class KartEnvironment(ParallelEnv):
         dict[AgentID, bool],
         dict[AgentID, dict],
     ]:
-
-        observations = {}
-        rewards = {}
-        terminations = {}
-        truncations = {}
-        infos = {}
-
         self._send_actions(actions)
 
         raw_vector_obs = self.mem.read_obs()
-        raw_graphic_obs = self.graphic_obs.get() # TODO give graphic obs correctly
-        #save_graphic_obs(raw_graphic_obs) # for DEBUG
+        raw_graphic_obs = self.graphic_obs.get()
+
+        observations = self._build_observations(raw_vector_obs, raw_graphic_obs)
+
+        player_infos = raw_vector_obs["PLAYER_INFO"]
+        rewards: dict[AgentID, float] = {}
+        terminations: dict[AgentID, bool] = {}
+        truncations: dict[AgentID, bool] = {}
+        infos: dict[AgentID, dict] = {}
 
         for agent_id in self.agents:
-            observation = {
-                "RACE_INFO": raw_vector_obs["RACE_INFO"],
-                "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
-                "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3 + agent_id]),
-            }
-            observations[agent_id] = observation
-
             rewards[agent_id] = 0.0
-
-            termination = bool(raw_vector_obs["PLAYER_INFO"][agent_id]["StateBit"] & 32)
-            terminations[agent_id] = termination
-
+            terminations[agent_id] = bool(player_infos[agent_id]["StateBit"] & 32)
             truncations[agent_id] = False
-
             infos[agent_id] = {}
 
         return observations, rewards, terminations, truncations, infos
 
-    def close(self):
+    def close(self) -> None:
         if self._closed:
             return
         self._closed = True
@@ -143,24 +138,29 @@ class KartEnvironment(ParallelEnv):
         except Exception:
             pass
 
-    def click(self, actions: dict[AgentID, ActionType], num_frame: int = 250):
+    def click(self, actions: dict[AgentID, ActionType], num_frame: int = 250) -> None:
         self._send_actions(actions)
+        # Fast path: send pre-computed neutral payload for idle frames
+        sendall = self.conn.sendall
+        recv = self.conn.recv
+        neutral = _NEUTRAL_STEP_PAYLOAD
         for _ in range(num_frame):
-            self._send_actions({})
+            sendall(neutral)
+            assert recv(1024) == b"step_done"
 
-    def save_file(self, path: str):
+    def save_file(self, path: str) -> None:
         self.conn.sendall(b"savefile" + path.encode())
         assert self.conn.recv(1024) == b"save_done"
 
-    def save_slot(self, slot: int):
+    def save_slot(self, slot: int) -> None:
         self.conn.sendall(b"saveslot" + str(slot).encode())
         assert self.conn.recv(1024) == b"save_done"
 
-    def load_file(self, path: str):
+    def load_file(self, path: str) -> None:
         self.conn.sendall(b"loadfile" + path.encode())
         assert self.conn.recv(1024) == b"load_done"
 
-    def load_slot(self, slot: int):
+    def load_slot(self, slot: int) -> None:
         self.conn.sendall(b"loadslot" + str(slot).encode())
         assert self.conn.recv(1024) == b"load_done"
 
@@ -193,7 +193,7 @@ class KartEnvironment(ParallelEnv):
             }
         )
 
-    def _run_env(self):
+    def _run_env(self) -> None:
         self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -248,33 +248,50 @@ class KartEnvironment(ParallelEnv):
         self.conn, _ = self.server_sock.accept()
         self.mem = DolphinMem(dolphin_process.pid)
 
+    def _build_observations(
+        self,
+        raw_vector_obs: ObservationDict,
+        raw_graphic_obs: list[Any],
+    ) -> dict[AgentID, ObsType]:
+        race_info = raw_vector_obs["RACE_INFO"]
+        player_infos = raw_vector_obs["PLAYER_INFO"]
+        shared_gfx = (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2])
+        return {
+            agent_id: {
+                "RACE_INFO": race_info,
+                "PLAYER_INFO": player_infos[agent_id],
+                "GRAPHIC_INFO": (*shared_gfx, raw_graphic_obs[3 + agent_id]),
+            }
+            for agent_id in self.agents
+        }
+
     def _pack_actions(self, actions: dict[AgentID, ActionType]) -> bytes:
-        data = []
+        data: list[int | float] = []
         for i in range(len(self.agents)):
-            action = NEUTRAL_ACTION.copy()
+            action: GcAction = {**NEUTRAL_ACTION}  # type: ignore[typeddict-item]
             if i in actions:
                 action.update(actions[i])
 
             button_mask = 0
             for j, btn in enumerate(GC_BUTTONS):
-                if action[btn]:
+                if action.get(btn):  # type: ignore[arg-type]
                     button_mask |= 1 << j
 
             data.append(button_mask)
             data.extend(
                 [
-                    action["StickX"],
-                    action["StickY"],
-                    action["CStickX"],
-                    action["CStickY"],
-                    action["TriggerLeft"],
-                    action["TriggerRight"],
+                    action.get("StickX", 0.0),
+                    action.get("StickY", 0.0),
+                    action.get("CStickX", 0.0),
+                    action.get("CStickY", 0.0),
+                    action.get("TriggerLeft", 0.0),
+                    action.get("TriggerRight", 0.0),
                 ]
             )
 
-        return struct.pack("<" + "H6f" * 4, *data)
+        return _ACTION_STRUCT.pack(*data)
 
-    def _send_actions(self, actions: dict[AgentID, ActionType]):
+    def _send_actions(self, actions: dict[AgentID, ActionType]) -> None:
         payload = b"step" + self._pack_actions(actions)
         self.conn.sendall(payload)
         assert self.conn.recv(1024) == b"step_done"
