@@ -97,7 +97,7 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen en_US.UTF-8
 
-COPY dolphin-src /dolphin-src
+COPY --from=dolphin-src / /dolphin-src
 RUN cd /dolphin-src && \
     git -c submodule."Externals/Qt".update=none \
         -c submodule."Externals/FFmpeg-bin".update=none \

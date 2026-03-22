@@ -1,10 +1,12 @@
-name: kart_env
+name: kart-env
 
 services:
   kart_env:
     build:
       context: .
       dockerfile: Dockerfile
+      additional_contexts:
+        dolphin-src: ../dolphin
     image: kart_env
     container_name: kart_env
     ports:
@@ -12,7 +14,7 @@ services:
     volumes:
       - ./src:/kart_env/src
       - ./main.py:/workspace/main.py
-      - ./MarioKartWii.iso:/workspace/MarioKartWii.iso:ro
+      - ../MarioKartWii.iso:/workspace/MarioKartWii.iso:ro
       - ./users:/workspace/users
     ipc: host
     ulimits:

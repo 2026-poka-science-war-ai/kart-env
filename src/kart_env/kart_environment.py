@@ -70,12 +70,13 @@ class KartEnvironment(ParallelEnv):
 
         raw_vector_obs = self.mem.read_obs()
         raw_graphic_obs = self.graphic_obs.get() # TODO give graphic obs correctly
-        save_graphic_obs(raw_graphic_obs) # for DEBUG
+        # save_graphic_obs(raw_graphic_obs) # for DEBUG
 
         for agent_id in self.agents:
             observation = {
                 "RACE_INFO": raw_vector_obs["RACE_INFO"],
                 "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
+                "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3 + agent_id]),
             }
             observations[agent_id] = observation
 
@@ -103,12 +104,13 @@ class KartEnvironment(ParallelEnv):
 
         raw_vector_obs = self.mem.read_obs()
         raw_graphic_obs = self.graphic_obs.get() # TODO give graphic obs correctly
-        save_graphic_obs(raw_graphic_obs) # for DEBUG
+        #save_graphic_obs(raw_graphic_obs) # for DEBUG
 
         for agent_id in self.agents:
             observation = {
                 "RACE_INFO": raw_vector_obs["RACE_INFO"],
                 "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
+                "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3 + agent_id]),
             }
             observations[agent_id] = observation
 
@@ -126,7 +128,7 @@ class KartEnvironment(ParallelEnv):
     def close(self):
         if self._closed:
             return
-        self.closed = True
+        self._closed = True
 
         self.graphic_obs.close()
         self.conn.sendall(b"close")
