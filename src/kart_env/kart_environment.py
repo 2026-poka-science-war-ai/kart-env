@@ -130,8 +130,7 @@ class KartEnvironment(ParallelEnv):
             return
         self._closed = True
 
-        if hasattr(self, "graphic_obs"):
-            self.graphic_obs.close()
+        self.graphic_obs.close()
         self.conn.sendall(b"close")
         self.conn.close()
         self.server_sock.close()
