@@ -68,7 +68,7 @@ class KartEnvironment(ParallelEnv):
 
         launch_game(self, self.options)
         for dolphin in self.dolphins:
-            self.graphic_obss.append(KartGraphicObs(dolphin.env_id))
+            self.graphic_obss.append(KartGraphicObs(dolphin.instance_id))
         self.save_slot(0)
 
     def __del__(self):

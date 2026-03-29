@@ -6,8 +6,8 @@ from PIL import Image
 
 
 class KartGraphicObs:
-    def __init__(self, env_id: int):
-        self.shm_name = f"DolphinSharedFrameBuffer_{env_id}"
+    def __init__(self, instance_id: int):
+        self.shm_name = f"DolphinSharedFrameBuffer_{instance_id}"
         self.NUM_SHM_FRAMES = 7
         self.HEADER_METADATA_SIZE = 40
         self.FRAME_INFO_SIZE = 32
