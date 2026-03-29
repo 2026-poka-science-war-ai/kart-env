@@ -852,15 +852,18 @@ class OptionType:
         ]
     )
     vehicle: list[VehicleChoice] = field(
-        default_factory=lambda: [VehicleChoice.STANDARD_KART_M] * 4
+        default_factory=lambda: [VehicleChoice.STANDARD_KART_M] * 12
     )
     drift_modes: list[DriftModeChoice] = field(
-        default_factory=lambda: [DriftModeChoice.MANUAL] * 4
+        default_factory=lambda: [DriftModeChoice.MANUAL] * 12
     )
     cup: CupChoice = CupChoice.MUSHROOM_CUP
     course: CourseChoice = CourseChoice.LUIGI_CIRCUIT
     cc: CCChoice = CCChoice.CC_100
     verbose: bool = False
+
+    def __post_init__(self):
+        pass  # TODO: Add validation to ensure character and vehicle choices are compatible with num_agents and cc.
 
 
 ChoiceEnum = TypeVar("ChoiceEnum", bound=Enum)
