@@ -8,7 +8,7 @@ services:
       additional_contexts:
         dolphin-src: ../dolphin
     image: kart_env
-    container_name: kart_env
+    # container_name: kart_env
     ports:
       - "6080-6091:6080-6091" # Assume we use 12 clients in a container
     volumes:
@@ -50,3 +50,9 @@ services:
       - "nas.nintendowifi.net:146.56.169.123"
       - "nintendowifi.net:146.56.169.123"
       - "wiimmfi.de:146.56.169.123"
+    networks:
+      - kart_net
+
+networks:
+  kart_net:
+    driver: bridge

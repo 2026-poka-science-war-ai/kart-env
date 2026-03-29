@@ -3,8 +3,9 @@ import socket
 import struct
 import os
 
-env_id = int(os.environ["ENV_ID"])
-port = 9999 + env_id
+instance_id = int(os.environ["INSTANCE_ID"])
+num_agents = int(os.environ["NUM_AGENTS"])
+port = 9999 + instance_id
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(("localhost", port))
 
@@ -19,7 +20,7 @@ while True:
     payload = data[4:]
 
     if data.startswith(b"step"):
-        for i in range(4):
+        for i in range(num_agents):
             offset = i * AGENT_SIZE
             btn_mask, sx, sy, csx, csy, tl, tr = struct.unpack_from(
                 AGENT_STRUCT, payload, offset

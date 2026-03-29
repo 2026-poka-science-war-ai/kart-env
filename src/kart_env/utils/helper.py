@@ -13,27 +13,31 @@ def exec_cmd(env: KartEnvironment, command: str):
 def launch_game(env: KartEnvironment, options: OptionType):
     enter_main_menu(env, options)
 
-    match options.num_agents:
-        case 1:
-            _launch_game_1p(env, options)
-        case 4:
-            _launch_game_4p(env, options)
-        case 12:
-            raise NotImplementedError("12 players macro is not implemented yet.")
-        case _:
-            raise NotImplementedError("Only 1, 4, 12 agents are supported now.")
+    if not options.online_mode:
+        match options.num_agents:
+            case 1:
+                _launch_game_1p(env, options)
+            case 4:
+                _launch_game_4p(env, options)
+            case 12:
+                raise NotImplementedError("12 players mode is not implemented yet.")
+            case _:
+                raise NotImplementedError("Only 1, 4, 12 agents are supported now.")
+    else:
+        _launch_game_wfc(env, options)
 
 
 def enter_main_menu(env: KartEnvironment, options: OptionType) -> None:
+    all_A = {agent_id: {"A": 1} for agent_id in env.agents}
     env.click({}, num_frame=500)
-    env.click({0: {"A": 1}}, num_frame=500)
+    env.click(all_A, num_frame=500)
 
     if options.is_license_created:
         for _ in range(2):
-            env.click({0: {"A": 1}})
+            env.click(all_A)
     else:
         for _ in range(7):
-            env.click({0: {"A": 1}})
+            env.click(all_A)
 
 
 def _launch_game_1p(env: KartEnvironment, options: OptionType):
@@ -116,6 +120,10 @@ def _launch_game_4p(env: KartEnvironment, options: OptionType):
     select_course(env, options)
 
     env.click({}, num_frame=1250)
+
+
+def _launch_game_wfc(env: KartEnvironment, options: OptionType):
+    raise NotImplementedError("12 players mode is not implemented yet.")
 
 
 def select_character(env: KartEnvironment, options: OptionType):
@@ -238,12 +246,12 @@ def select_cup(env: KartEnvironment, options: OptionType):
     for _ in range(target_col):
         env.click({0: {"Right": 1}}, num_frame=10)
 
-    env.click({0: {"A": 1}}, num_frame=50)
+    env.click({0: {"A": 1}}, num_frame=150)
 
 
 def select_course(env: KartEnvironment, options: OptionType):
     target_index = CoursePositionMap[options.course]
     for _ in range(target_index):
         env.click({0: {"Down": 1}}, num_frame=10)
-    env.click({0: {"A": 1}}, num_frame=100)
-    env.click({0: {"A": 1}}) # ok
+    env.click({0: {"A": 1}}, num_frame=200)
+    env.click({0: {"A": 1}})

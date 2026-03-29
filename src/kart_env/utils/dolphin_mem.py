@@ -65,7 +65,7 @@ class DolphinMem:
             curr = self.read_ptr(curr)
         return curr + offsets[-1]
 
-    def read_obs(self) -> dict:
+    def read_obs(self, agent_n: int) -> dict:
         obs = {"RACE_INFO": {}, "PLAYER_INFO": []}
 
         obs["RACE_INFO"] = {
@@ -76,7 +76,7 @@ class DolphinMem:
             "EngineClass": self.read_u32(self.resolve_chain(0x809BD728, [0xB6C])),
         }
 
-        for n in range(4):
+        for n in range(agent_n):
             p_info = {}
             p_info["PlayerID"] = n
 
