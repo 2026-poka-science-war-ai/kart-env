@@ -8,7 +8,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./dwc-docker/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./dwc/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     sysctls:
       - net.ipv4.ip_unprivileged_port_start=0
     networks:
