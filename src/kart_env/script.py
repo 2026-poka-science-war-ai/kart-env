@@ -3,9 +3,9 @@ import socket
 import struct
 import os
 
-env_id = int(os.environ["ENV_ID"])
+instance_id = int(os.environ["INSTANCE_ID"])
 num_agents = int(os.environ["NUM_AGENTS"])
-port = 9999 + env_id
+port = 9999 + instance_id
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(("localhost", port))
 

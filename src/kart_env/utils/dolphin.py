@@ -16,18 +16,18 @@ AgentID = int
 
 
 class Dolphin:
-    def __init__(self, env_id: int, options: OptionType | None = None):
+    def __init__(self, instance_id: int, options: OptionType | None = None):
         self.options = options if options is not None else OptionType()
         self._closed = False
 
         self.possible_agents = [i for i in range(self.options.num_agents)]
         self.agents = self.possible_agents
 
-        self.env_id = env_id
-        self.vnc_port = VNC_BASE + env_id
-        self.novnc_port = NOVNC_BASE + env_id
-        self.sock_port = SOCK_BASE + env_id
-        self.user_dir = pathlib.Path("users") / str(env_id)
+        self.instance_id = instance_id
+        self.vnc_port = VNC_BASE + instance_id
+        self.novnc_port = NOVNC_BASE + instance_id
+        self.sock_port = SOCK_BASE + instance_id
+        self.user_dir = pathlib.Path("users") / str(instance_id)
         self.dolphin_proc_pid: int | None = None
 
         if not self.user_dir.exists():
@@ -85,15 +85,15 @@ class Dolphin:
         self.server_sock.bind(("localhost", self.sock_port))
         self.server_sock.listen(1)
 
-        xvfb_command = ["Xvfb", f":{self.env_id}", "-screen", "0", "640x480x24"]
+        xvfb_command = ["Xvfb", f":{self.instance_id}", "-screen", "0", "640x480x24"]
         self.processes.append(subprocess.Popen(xvfb_command, stdout=stdout))
-        while not os.path.exists(f"/tmp/.X11-unix/X{self.env_id}"):
+        while not os.path.exists(f"/tmp/.X11-unix/X{self.instance_id}"):
             time.sleep(0.1)
 
         x11vnc_command = [
             "x11vnc",
             "-display",
-            f":{self.env_id}",
+            f":{self.instance_id}",
             "-forever",
             "-nopw",
             "-shared",
@@ -125,8 +125,8 @@ class Dolphin:
             script_path,
         ]
         dolphin_env = os.environ.copy()
-        dolphin_env["DISPLAY"] = f":{self.env_id}"
-        dolphin_env["ENV_ID"] = f"{self.env_id}"
+        dolphin_env["DISPLAY"] = f":{self.instance_id}"
+        dolphin_env["INSTANCE_ID"] = f"{self.instance_id}"
         dolphin_env["NUM_AGENTS"] = f"{self.options.num_agents}"
         dolphin_process = subprocess.Popen(dolphin_command, env=dolphin_env, stdout=stdout)
         self.processes.append(dolphin_process)
