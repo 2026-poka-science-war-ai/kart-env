@@ -128,7 +128,9 @@ class Dolphin:
         dolphin_env["DISPLAY"] = f":{self.instance_id}"
         dolphin_env["INSTANCE_ID"] = f"{self.instance_id}"
         dolphin_env["NUM_AGENTS"] = f"{self.options.num_agents}"
-        dolphin_process = subprocess.Popen(dolphin_command, env=dolphin_env, stdout=stdout)
+        dolphin_process = subprocess.Popen(
+            dolphin_command, env=dolphin_env, stdout=stdout
+        )
         self.processes.append(dolphin_process)
 
         self.dolphin_proc_pid = dolphin_process.pid

@@ -838,7 +838,9 @@ class CCChoice(Enum):
 @dataclass
 class OptionType:
     num_agents: int = 4
-    online_mode: bool = False  # True if the race is WFC, False if local(num_agents == 1 or 4)
+    online_mode: bool = (
+        False  # True if the race is WFC, False if local(num_agents == 1 or 4)
+    )
     is_license_created: bool = True
     race: RaceChoice = RaceChoice.SOLO_RACE
     character: list[CharacterChoice] = field(

@@ -38,16 +38,19 @@ class KartEnvironment(ParallelEnv):
         self.agents = [i for i in range(self.options.num_agents)]
 
         if self.options.online_mode:
-            self.agent_mapper = lambda x: (x, 0) # agent_id corresponds directly to dolphin index
+            self.agent_mapper = lambda x: (
+                x,
+                0,
+            )  # agent_id corresponds directly to dolphin index
             """mapping function from global agent_id to (dolphin_idx, agent_id_within_dolphin)"""
 
             for i in range(self.options.num_agents):
                 _options = replace(
-                    self.options, 
-                    num_agents=1, 
-                    character=[self.options.character[i]], 
-                    vehicle=[self.options.vehicle[i]], 
-                    drift_modes=[self.options.drift_modes[i]]
+                    self.options,
+                    num_agents=1,
+                    character=[self.options.character[i]],
+                    vehicle=[self.options.vehicle[i]],
+                    drift_modes=[self.options.drift_modes[i]],
                 )
                 dolphin = Dolphin(instance_id=12 * env_id + i, options=_options)
                 assert dolphin.dolphin_proc_pid is not None
@@ -55,7 +58,7 @@ class KartEnvironment(ParallelEnv):
                 self.dolphins.append(dolphin)
                 self.dolphins_mem.append(DolphinMem(dolphin.dolphin_proc_pid))
         else:
-            self.agent_mapper = lambda x: (0, x) # dolphin_idx, agent_id_within_dolphin
+            self.agent_mapper = lambda x: (0, x)  # dolphin_idx, agent_id_within_dolphin
 
             dolphin = Dolphin(instance_id=12 * env_id, options=self.options)
             assert dolphin.dolphin_proc_pid is not None
@@ -131,24 +134,38 @@ class KartEnvironment(ParallelEnv):
             for agent_id in self.agents:
                 dolphin_idx, _ = self.agent_mapper(agent_id)
                 raw_vector_obs = self.dolphins_mem[dolphin_idx].read_obs(0)
-                raw_graphic_obs = self.graphic_obss[dolphin_idx].get() # TODO give graphic obs correctly
+                raw_graphic_obs = self.graphic_obss[
+                    dolphin_idx
+                ].get()  # TODO give graphic obs correctly
 
                 observation = {
                     "RACE_INFO": raw_vector_obs["RACE_INFO"],
                     "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][0],
-                    "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3]),
+                    "GRAPHIC_INFO": (
+                        raw_graphic_obs[0],
+                        raw_graphic_obs[1],
+                        raw_graphic_obs[2],
+                        raw_graphic_obs[3],
+                    ),
                 }
                 observations[agent_id] = observation
 
         else:
             raw_vector_obs = self.dolphins_mem[0].read_obs(self.options.num_agents)
-            raw_graphic_obs = self.graphic_obss[0].get() # TODO give graphic obs correctly
-            #save_graphic_obs(raw_graphic_obs) # for DEBUG
+            raw_graphic_obs = self.graphic_obss[
+                0
+            ].get()  # TODO give graphic obs correctly
+            # save_graphic_obs(raw_graphic_obs) # for DEBUG
             for agent_id in self.agents:
                 observation = {
                     "RACE_INFO": raw_vector_obs["RACE_INFO"],
                     "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
-                    "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3 + agent_id]),
+                    "GRAPHIC_INFO": (
+                        raw_graphic_obs[0],
+                        raw_graphic_obs[1],
+                        raw_graphic_obs[2],
+                        raw_graphic_obs[3 + agent_id],
+                    ),
                 }
                 observations[agent_id] = observation
 
@@ -173,9 +190,11 @@ class KartEnvironment(ParallelEnv):
     def _send_actions(self, actions: dict[AgentID, ActionType]):
         self.async_send_actions(actions)
         self.await_send_actions()
-            
+
     def async_send_actions(self, actions: dict[AgentID, ActionType]):
-        new_actions = {idx: {} for idx in range(len(self.dolphins))}  # {dolphin_idx: {agent_id_within_dolphin: action}}
+        new_actions = {
+            idx: {} for idx in range(len(self.dolphins))
+        }  # {dolphin_idx: {agent_id_within_dolphin: action}}
         for agent_id, action in actions.items():
             dolphin_idx, agent_id_within_dolphin = self.agent_mapper(agent_id)
             new_actions[dolphin_idx][agent_id_within_dolphin] = action

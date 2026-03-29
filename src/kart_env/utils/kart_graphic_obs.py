@@ -55,6 +55,7 @@ class KartGraphicObs:
     def __del__(self):
         self.close()
 
+
 def save_graphic_obs(observation: List[np.ndarray]):
     for i, obs_array in enumerate(observation, start=1):
         img = Image.fromarray(obs_array)
