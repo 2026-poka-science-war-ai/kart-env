@@ -1,5 +1,3 @@
-name: kart-env
-
 services:
   kart_env:
     build:

@@ -2,3 +2,4 @@ __pycache__/
 MarioKartWii.iso
 users/
 dolphin-src/
+compose.override.yml
