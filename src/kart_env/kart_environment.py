@@ -242,9 +242,106 @@ class KartEnvironment(ParallelEnv):
         self.async_load_slot(slot)
         self.await_load_done()
 
+    # fmt: off
     @functools.lru_cache(maxsize=None)
-    def observation_space(self, agent):  # type: ignore
-        return spaces.Discrete(1)
+    def observation_space(self, agent) -> spaces.Space:  # type: ignore
+        max_h, max_w = 480, 640
+        image_space = spaces.Box(low=0, high=255, shape=(max_h, max_w, 4), dtype=np.uint8)
+
+        return spaces.Dict({
+            "RACE_INFO": spaces.Dict({
+                "StageID": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "FrameCount": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "PlayerCount": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "CourseID": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "EngineClass": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+            }),
+            "PLAYER_INFO": spaces.Dict({
+                "PlayerID": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "LocalPlayerNum": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "RealControllerID": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "KartID": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "CharacterID": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+
+                "CurrentRaceCompletion": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+                "MaxRaceCompletion": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+                "FirstKcpLapCompletion": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+                "NextCheckpointLapCompletion": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+                "NextCheckpointLapCompletionMax": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+
+                "CurrentLap": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "MaxLap": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "currentKCP": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "maxKCP": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "StateBit": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+
+                "SoftSpeedLimit": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+                "HardSpeedLimit": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+
+                "Position": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+                "Velocity": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+                "InternalVelocity": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+                "ExternalVelocity": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+                "AngularVelocity": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+                "Acceleration": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+
+                "MainRotation": spaces.Box(-np.inf, np.inf, shape=(4,), dtype=np.float32),
+
+                "Speed": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+                "AccelerationKartMove": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+
+                "DriftState": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "MiniturboCharge": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "SMiniturboCharge": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "OffroadInvincibilityTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+
+                "WheelieFrameCount": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "WheelieCooldownCount": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "LeanRot": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+
+                "BitField0": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "BitField1": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "BitField2": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "BitField3": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "SurfaceFlag": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+
+                "Hop": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+
+                "MTBoostTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "AllMTCharge": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "MushroomBoostTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "TrickableTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "TrickCooldown": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "AirtimeCount": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+
+                "RacePosition": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "FloorCollisionCount": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "RespawnTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "WallCollideFlag": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+
+                "Item": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "ItemNum": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "PassiveItem": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+                "PassiveItemNum": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+
+                "StarTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "ShockTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "BlooperInkTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "BlooperStateFlag": spaces.Box(0, np.iinfo(np.uint8).max, shape=(), dtype=np.uint8),
+                "CrushTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+                "MegaTimer": spaces.Box(0, np.iinfo(np.uint16).max, shape=(), dtype=np.uint16),
+
+                "startBoostCharge": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.float32),
+                "startBoostIdx": spaces.Box(0, np.iinfo(np.uint32).max, shape=(), dtype=np.uint32),
+            }),
+            "GRAPHIC_INFO": spaces.Tuple((
+                image_space,
+                image_space,
+                image_space,
+                image_space
+            ))
+        })
+    # fmt: on
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent):  # type: ignore
