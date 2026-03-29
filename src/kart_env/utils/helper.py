@@ -28,15 +28,16 @@ def launch_game(env: KartEnvironment, options: OptionType):
 
 
 def enter_main_menu(env: KartEnvironment, options: OptionType) -> None:
+    all_A = {agent_id: {"A": 1} for agent_id in env.agents}
     env.click({}, num_frame=500)
-    env.click({0: {"A": 1}}, num_frame=500)
+    env.click(all_A, num_frame=500)
 
     if options.is_license_created:
         for _ in range(2):
-            env.click({0: {"A": 1}})
+            env.click(all_A)
     else:
         for _ in range(7):
-            env.click({0: {"A": 1}})
+            env.click(all_A)
 
 
 def _launch_game_1p(env: KartEnvironment, options: OptionType):
@@ -252,5 +253,5 @@ def select_course(env: KartEnvironment, options: OptionType):
     target_index = CoursePositionMap[options.course]
     for _ in range(target_index):
         env.click({0: {"Down": 1}}, num_frame=10)
-    env.click({0: {"A": 1}}, num_frame=150)
+    env.click({0: {"A": 1}}, num_frame=200)
     env.click({0: {"A": 1}})
