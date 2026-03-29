@@ -1,4 +1,5 @@
 import functools
+from dataclasses import replace
 from pettingzoo import ParallelEnv
 from gymnasium import spaces
 import pathlib
@@ -11,6 +12,7 @@ import socket
 import struct
 import numpy as np
 
+from .utils.dolphin import Dolphin
 from .utils.dolphin_mem import DolphinMem
 from .utils.kart_graphic_obs import KartGraphicObs, save_graphic_obs
 from .utils.enums import *
@@ -29,24 +31,41 @@ class KartEnvironment(ParallelEnv):
         self.options = options if options is not None else OptionType()
         self._closed = False
 
-        self.possible_agents = [i for i in range(self.options.num_agents)]
-        self.agents = self.possible_agents
+        self.dolphins: list[Dolphin] = []
+        self.dolphins_mem: list[DolphinMem] = []
+        self.graphic_obss: list[KartGraphicObs] = []
 
-        self.env_id = env_id
-        self.vnc_port = VNC_BASE + env_id
-        self.novnc_port = NOVNC_BASE + env_id
-        self.sock_port = SOCK_BASE + env_id
-        self.user_dir = pathlib.Path("users") / str(env_id)
+        self.agents = [i for i in range(self.options.num_agents)]
 
-        if not self.user_dir.exists():
-            dolphin_settings_path = pathlib.Path(__file__).parent / "dolphin_settings"
-            shutil.copytree(dolphin_settings_path, self.user_dir)
-            self.options.is_license_created = False
+        if self.options.online_mode:
+            self.agent_mapper = lambda x: (x, 0) # agent_id corresponds directly to dolphin index
+            """mapping function from global agent_id to (dolphin_idx, agent_id_within_dolphin)"""
 
-        self.processes: list[subprocess.Popen] = []
-        self._run_env()
+            for i in range(self.options.num_agents):
+                _options = replace(
+                    self.options, 
+                    num_agents=1, 
+                    character=[self.options.character[i]], 
+                    vehicle=[self.options.vehicle[i]], 
+                    drift_modes=[self.options.drift_modes[i]]
+                )
+                dolphin = Dolphin(env_id=env_id + i, options=_options)
+                assert dolphin.dolphin_proc_pid is not None
+
+                self.dolphins.append(dolphin)
+                self.dolphins_mem.append(DolphinMem(dolphin.dolphin_proc_pid))
+        else:
+            self.agent_mapper = lambda x: (0, x) # dolphin_idx, agent_id_within_dolphin
+
+            dolphin = Dolphin(env_id=env_id, options=self.options)
+            assert dolphin.dolphin_proc_pid is not None
+
+            self.dolphins.append(dolphin)
+            self.dolphins_mem.append(DolphinMem(dolphin.dolphin_proc_pid))
+
         launch_game(self, self.options)
-        self.graphic_obs = KartGraphicObs(self.env_id)
+        for dolphin in self.dolphins:
+            self.graphic_obss.append(KartGraphicObs(dolphin.env_id))
         self.save_slot(0)
 
     def __del__(self):
@@ -65,21 +84,10 @@ class KartEnvironment(ParallelEnv):
         else:
             self.load_slot(0)
 
-        observations = {}
+        observations = self._get_obs()
         infos = {}
 
-        raw_vector_obs = self.mem.read_obs()
-        raw_graphic_obs = self.graphic_obs.get() # TODO give graphic obs correctly
-        # save_graphic_obs(raw_graphic_obs) # for DEBUG
-
         for agent_id in self.agents:
-            observation = {
-                "RACE_INFO": raw_vector_obs["RACE_INFO"],
-                "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
-                "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3 + agent_id]),
-            }
-            observations[agent_id] = observation
-
             infos[agent_id] = {}
 
         # TODO combine graphic_obs and vector_obs into a single observation dict
@@ -102,21 +110,12 @@ class KartEnvironment(ParallelEnv):
 
         self._send_actions(actions)
 
-        raw_vector_obs = self.mem.read_obs()
-        raw_graphic_obs = self.graphic_obs.get() # TODO give graphic obs correctly
-        #save_graphic_obs(raw_graphic_obs) # for DEBUG
+        observations = self._get_obs()
 
         for agent_id in self.agents:
-            observation = {
-                "RACE_INFO": raw_vector_obs["RACE_INFO"],
-                "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
-                "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3 + agent_id]),
-            }
-            observations[agent_id] = observation
-
             rewards[agent_id] = 0.0
 
-            termination = bool(raw_vector_obs["PLAYER_INFO"][agent_id]["StateBit"] & 32)
+            termination = bool(observations[agent_id]["PLAYER_INFO"]["StateBit"] & 32)
             terminations[agent_id] = termination
 
             truncations[agent_id] = False
@@ -125,44 +124,112 @@ class KartEnvironment(ParallelEnv):
 
         return observations, rewards, terminations, truncations, infos
 
+    def _get_obs(self) -> dict[AgentID, ObsType]:
+        observations = {}
+
+        if self.options.online_mode:
+            for agent_id in self.agents:
+                dolphin_idx, _ = self.agent_mapper(agent_id)
+                raw_vector_obs = self.dolphins_mem[dolphin_idx].read_obs(0)
+                raw_graphic_obs = self.graphic_obss[dolphin_idx].get() # TODO give graphic obs correctly
+
+                observation = {
+                    "RACE_INFO": raw_vector_obs["RACE_INFO"],
+                    "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][0],
+                    "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3]),
+                }
+                observations[agent_id] = observation
+
+        else:
+            raw_vector_obs = self.dolphins_mem[0].read_obs(self.options.num_agents)
+            raw_graphic_obs = self.graphic_obss[0].get() # TODO give graphic obs correctly
+            #save_graphic_obs(raw_graphic_obs) # for DEBUG
+            for agent_id in self.agents:
+                observation = {
+                    "RACE_INFO": raw_vector_obs["RACE_INFO"],
+                    "PLAYER_INFO": raw_vector_obs["PLAYER_INFO"][agent_id],
+                    "GRAPHIC_INFO": (raw_graphic_obs[0], raw_graphic_obs[1], raw_graphic_obs[2], raw_graphic_obs[3 + agent_id]),
+                }
+                observations[agent_id] = observation
+
+        return observations
+
     def close(self):
         if self._closed:
             return
         self._closed = True
 
-        self.graphic_obs.close()
-        self.conn.sendall(b"close")
-        self.conn.close()
-        self.server_sock.close()
+        for graphic_obs in self.graphic_obss:
+            graphic_obs.close()
 
-        try:
-            for proc in reversed(self.processes):
-                proc.terminate()
-                proc.wait()
-
-        except Exception:
-            pass
+        for dolphin in self.dolphins:
+            dolphin.close()
 
     def click(self, actions: dict[AgentID, ActionType], num_frame: int = 250):
         self._send_actions(actions)
-        for _ in range(num_frame):
+        for _ in range(num_frame - 1):
             self._send_actions({})
 
+    def _send_actions(self, actions: dict[AgentID, ActionType]):
+        self.async_send_actions(actions)
+        self.await_send_actions()
+            
+    def async_send_actions(self, actions: dict[AgentID, ActionType]):
+        new_actions = {idx: {} for idx in range(len(self.dolphins))}  # {dolphin_idx: {agent_id_within_dolphin: action}}
+        for agent_id, action in actions.items():
+            dolphin_idx, agent_id_within_dolphin = self.agent_mapper(agent_id)
+            new_actions[dolphin_idx][agent_id_within_dolphin] = action
+
+        for dolphin_idx, dolphin_actions in new_actions.items():
+            self.dolphins[dolphin_idx].async_send_actions(dolphin_actions)
+
+    def await_send_actions(self):
+        for dolphin in self.dolphins:
+            dolphin.await_send_actions()
+
+    def await_step_done(self):
+        for dolphin in self.dolphins:
+            dolphin.await_send_actions()
+
+    def async_save_file(self, path: str):
+        for dolphin in self.dolphins:
+            dolphin.async_save_file(path)
+
+    def async_save_slot(self, slot: int):
+        for dolphin in self.dolphins:
+            dolphin.async_save_slot(slot)
+
+    def await_save_done(self):
+        for dolphin in self.dolphins:
+            dolphin.await_save_done()
+
     def save_file(self, path: str):
-        self.conn.sendall(b"savefile" + path.encode())
-        assert self.conn.recv(1024) == b"save_done"
+        self.async_save_file(path)
+        self.await_save_done()
 
     def save_slot(self, slot: int):
-        self.conn.sendall(b"saveslot" + str(slot).encode())
-        assert self.conn.recv(1024) == b"save_done"
+        self.async_save_slot(slot)
+        self.await_save_done()
+
+    def async_load_file(self, path: str):
+        for dolphin in self.dolphins:
+            dolphin.async_load_file(path)
+
+    def async_load_slot(self, slot: int):
+        for dolphin in self.dolphins:
+            dolphin.async_load_slot(slot)
+
+    def await_load_done(self):
+        for dolphin in self.dolphins:
+            dolphin.await_load_done()
 
     def load_file(self, path: str):
-        self.conn.sendall(b"loadfile" + path.encode())
-        assert self.conn.recv(1024) == b"load_done"
+        self.async_load_file(path)
+        self.await_load_done()
 
     def load_slot(self, slot: int):
-        self.conn.sendall(b"loadslot" + str(slot).encode())
-        assert self.conn.recv(1024) == b"load_done"
+        self.async_load_slot(slot)
+        self.await_load_done()
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent):  # type: ignore
@@ -192,89 +259,3 @@ class KartEnvironment(ParallelEnv):
                 # "TriggerRight": spaces.Box(0.0, 1.0, (), np.float32),
             }
         )
-
-    def _run_env(self):
-        self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.server_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        self.server_sock.bind(("localhost", self.sock_port))
-        self.server_sock.listen(1)
-
-        xvfb_command = ["Xvfb", f":{self.env_id}", "-screen", "0", "640x480x24"]
-        self.processes.append(subprocess.Popen(xvfb_command))
-        while not os.path.exists(f"/tmp/.X11-unix/X{self.env_id}"):
-            time.sleep(0.1)
-
-        x11vnc_command = [
-            "x11vnc",
-            "-display",
-            f":{self.env_id}",
-            "-forever",
-            "-nopw",
-            "-shared",
-            "-rfbport",
-            str(self.vnc_port),
-        ]
-        self.processes.append(subprocess.Popen(x11vnc_command))
-
-        websockify_command = [
-            "websockify",
-            "--web",
-            "/usr/share/novnc/",
-            str(self.novnc_port),
-            f"localhost:{self.vnc_port}",
-        ]
-        self.processes.append(subprocess.Popen(websockify_command))
-
-        script_path = pathlib.Path(__file__).parent / "script.py"
-        dolphin_command = [
-            "vglrun",
-            "-d",
-            "egl0",
-            DOLPHIN_PATH,
-            "--batch",
-            f"--user={self.user_dir}",
-            "-e",
-            "MarioKartWii.iso",
-            "--script",
-            script_path,
-        ]
-        dolphin_env = os.environ.copy()
-        dolphin_env["DISPLAY"] = f":{self.env_id}"
-        dolphin_env["ENV_ID"] = f"{self.env_id}"
-        dolphin_process = subprocess.Popen(dolphin_command, env=dolphin_env)
-        self.processes.append(dolphin_process)
-
-        self.conn, _ = self.server_sock.accept()
-        self.mem = DolphinMem(dolphin_process.pid)
-
-    def _pack_actions(self, actions: dict[AgentID, ActionType]) -> bytes:
-        data = []
-        for i in range(4):
-            action = NEUTRAL_ACTION.copy()
-            if i in actions:
-                action.update(actions[i])
-
-            button_mask = 0
-            for j, btn in enumerate(GC_BUTTONS):
-                if action[btn]:
-                    button_mask |= 1 << j
-
-            data.append(button_mask)
-            data.extend(
-                [
-                    action["StickX"],
-                    action["StickY"],
-                    action["CStickX"],
-                    action["CStickY"],
-                    action["TriggerLeft"],
-                    action["TriggerRight"],
-                ]
-            )
-
-        return struct.pack("<" + "H6f" * 4, *data)
-
-    def _send_actions(self, actions: dict[AgentID, ActionType]):
-        payload = b"step" + self._pack_actions(actions)
-        self.conn.sendall(payload)
-        assert self.conn.recv(1024) == b"step_done"
