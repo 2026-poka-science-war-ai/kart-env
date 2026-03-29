@@ -15,7 +15,7 @@ def launch_game(env: KartEnvironment, options: OptionType):
 
     match options.num_agents:
         case 1:
-            raise NotImplementedError("Single player macro is not implemented yet.")
+            _launch_game_1p(env, options)
         case 4:
             _launch_game_4p(env, options)
         case 12:
@@ -34,6 +34,43 @@ def enter_main_menu(env: KartEnvironment, options: OptionType) -> None:
     else:
         for _ in range(7):
             env.click({0: {"A": 1}})
+
+
+def _launch_game_1p(env: KartEnvironment, options: OptionType):
+    env.click({0: {"A": 1}}, num_frame=500)
+
+    env.click({0: {"Down": 1}}, num_frame=10)
+    env.click({0: {"Down": 1}}, num_frame=10)
+    env.click({0: {"A": 1}}, num_frame=100)  # select VS Race in ["VS Race", "Battle"]
+
+    # TODO: setting rules (CC, CPU, etc.) in the future
+
+    if options.race == RaceChoice.SOLO_RACE:
+        env.click({0: {"A": 1}})
+    elif options.race == RaceChoice.TEAM_RACE:
+        env.click({0: {"Down": 1}}, num_frame=10)
+        env.click({0: {"A": 1}})
+
+    select_character(env, options)
+
+    if options.race == RaceChoice.TEAM_RACE:
+        # Team select
+        env.click({0: {"A": 1}})
+
+    select_vehicle(env, options)
+
+    if options.drift_modes[0] == DriftModeChoice.AUTOMATIC:
+        env.click({0: {"Up": 1}}, num_frame=10)
+        env.click({0: {"A": 1}}, num_frame=10)
+    elif options.drift_modes[0] == DriftModeChoice.MANUAL:
+        env.click({0: {"A": 1}}, num_frame=10)
+    env.click({})
+
+    select_cup(env, options)
+
+    select_course(env, options)
+
+    env.click({}, num_frame=1250)
 
 
 def _launch_game_4p(env: KartEnvironment, options: OptionType):
@@ -159,7 +196,7 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
                 f"but {selected_class.value} allows only: {allowed_text}."
             )
 
-        is_grid = False  # relevant for single play. choose kart via grid
+        is_grid = True if options.num_agents == 1 else False  # relevant for single play. choose kart via grid
         if is_grid:
             start_row, start_col = (0, 0)
             target_row, target_col = VehiclePositionMap[selected_vehicle]
@@ -208,5 +245,5 @@ def select_course(env: KartEnvironment, options: OptionType):
     target_index = CoursePositionMap[options.course]
     for _ in range(target_index):
         env.click({0: {"Down": 1}}, num_frame=10)
-    env.click({0: {"A": 1}}, num_frame=50)
-    env.click({0: {"A": 1}})
+    env.click({0: {"A": 1}}, num_frame=100)
+    env.click({0: {"A": 1}}) # ok

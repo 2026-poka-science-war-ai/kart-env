@@ -250,7 +250,7 @@ class KartEnvironment(ParallelEnv):
 
     def _pack_actions(self, actions: dict[AgentID, ActionType]) -> bytes:
         data = []
-        for i in range(len(self.agents)):
+        for i in range(4):
             action = NEUTRAL_ACTION.copy()
             if i in actions:
                 action.update(actions[i])
