@@ -119,6 +119,19 @@ class KartEnvironment(ParallelEnv):
 
         return observations, rewards, terminations, truncations, infos
 
+    def close(self):
+        if self._closed:
+            return
+        self._closed = True
+
+        for graphic_obs in self.graphic_obss:
+            graphic_obs.close()
+
+        for dolphin in self.dolphins:
+            dolphin.close()
+
+    """HELPER FUNCTIONS"""
+
     def _get_obs(self) -> dict[AgentID, ObsType]:
         observations = {}
 
@@ -163,25 +176,14 @@ class KartEnvironment(ParallelEnv):
 
         return observations
 
-    def close(self):
-        if self._closed:
-            return
-        self._closed = True
-
-        for graphic_obs in self.graphic_obss:
-            graphic_obs.close()
-
-        for dolphin in self.dolphins:
-            dolphin.close()
+    def _send_actions(self, actions: dict[AgentID, ActionType]):
+        self.async_send_actions(actions)
+        self.await_send_actions()
 
     def click(self, actions: dict[AgentID, ActionType], num_frame: int = 250):
         self._send_actions(actions)
         for _ in range(num_frame - 1):
             self._send_actions({})
-
-    def _send_actions(self, actions: dict[AgentID, ActionType]):
-        self.async_send_actions(actions)
-        self.await_send_actions()
 
     def async_send_actions(self, actions: dict[AgentID, ActionType]):
         new_actions = {
