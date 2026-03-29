@@ -7,8 +7,15 @@ import time
 import socket
 import struct
 
-from .enums import *
 from .macro_helper import OptionType
+from .enums import (
+    VNC_BASE,
+    NOVNC_BASE,
+    SOCK_BASE,
+    DOLPHIN_PATH,
+    GC_BUTTONS,
+    NEUTRAL_ACTION,
+)
 
 ObsType = Dict[str, Any]
 ActionType = Dict[str, Any]

@@ -2,20 +2,12 @@ import functools
 from dataclasses import replace
 from pettingzoo import ParallelEnv
 from gymnasium import spaces
-import pathlib
 from typing import Any, Dict
-import subprocess
-import os
-import shutil
-import time
-import socket
-import struct
 import numpy as np
 
 from .utils.dolphin import Dolphin
 from .utils.dolphin_mem import DolphinMem
-from .utils.kart_graphic_obs import KartGraphicObs, save_graphic_obs
-from .utils.enums import *
+from .utils.kart_graphic_obs import KartGraphicObs
 from .utils.helper import launch_game
 from .utils.macro_helper import OptionType
 
