@@ -64,7 +64,7 @@ services:
     image: kart_env
     # container_name: kart_env
     ports:
-      - "6180-6191:6080-6091" # Assume we use 12 clients in a container
+      - "6080-6091:6080-6091" # Assume we use 12 clients in a container
     volumes:
       - ./src:/kart_env/src
       - ./main.py:/workspace/main.py
