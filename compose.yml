@@ -1,60 +1,6 @@
 name: kart-env
 
 services:
-  dwc_haproxy:
-    image: haproxy:lts-alpine
-    # container_name: dwc_haproxy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    volumes:
-      - ../dwc/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    sysctls:
-      - net.ipv4.ip_unprivileged_port_start=0
-    networks:
-      kart_net:
-        aliases:
-          - gamestats.gs.nintendowifi.net
-          - gamestats2.gs.nintendowifi.net
-          - mariokartwii.gamestats.gs.nintendowifi.net
-          - mariokartwii.gamestats2.gs.nintendowifi.net
-          - mariokartwii.sake.gs.nintendowifi.net
-          - mariokartwii.available.gs.nintendowifi.net
-          - naswii.nintendowifi.net
-          - nas.nintendowifi.net
-          - conntest.nintendowifi.net
-          - nintendowifi.net
-
-  dwc:
-    build:
-      context: ../dwc
-    # container_name: dwc
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-      - "9000:9000"
-      - "9001:9001"
-      - "27500:27500"
-      - "28910:28910"
-      - "29900:29900"
-      - "29901:29901"
-      - "29920:29920"
-      - "27900:27900/udp"
-      - "27901:27901/udp"
-    volumes:
-      - ../dwc/data:/dwc/data
-    networks:
-      kart_net:
-        aliases:
-          - gpcm.gs.nintendowifi.net
-          - gpsp.gs.nintendowifi.net
-          - mariokartwii.master.gs.nintendowifi.net
-          - mariokartwii.ms19.gs.nintendowifi.net
-          - mariokartwii.natneg1.gs.nintendowifi.net
-          - mariokartwii.natneg2.gs.nintendowifi.net
-          - mariokartwii.natneg3.gs.nintendowifi.net
-          - wiimmfi.de
-
   kart_env:
     build:
       context: .
