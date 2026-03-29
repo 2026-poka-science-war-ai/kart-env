@@ -49,7 +49,7 @@ class KartEnvironment(ParallelEnv):
                     vehicle=[self.options.vehicle[i]], 
                     drift_modes=[self.options.drift_modes[i]]
                 )
-                dolphin = Dolphin(env_id=12 * env_id + i, options=_options)
+                dolphin = Dolphin(instance_id=12 * env_id + i, options=_options)
                 assert dolphin.dolphin_proc_pid is not None
 
                 self.dolphins.append(dolphin)
@@ -57,7 +57,7 @@ class KartEnvironment(ParallelEnv):
         else:
             self.agent_mapper = lambda x: (0, x) # dolphin_idx, agent_id_within_dolphin
 
-            dolphin = Dolphin(env_id=12 * env_id, options=self.options)
+            dolphin = Dolphin(instance_id=12 * env_id, options=self.options)
             assert dolphin.dolphin_proc_pid is not None
 
             self.dolphins.append(dolphin)
