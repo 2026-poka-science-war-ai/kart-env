@@ -858,6 +858,7 @@ class OptionType:
     cup: CupChoice = CupChoice.MUSHROOM_CUP
     course: CourseChoice = CourseChoice.LUIGI_CIRCUIT
     cc: CCChoice = CCChoice.CC_100
+    verbose: bool = False
 
 
 ChoiceEnum = TypeVar("ChoiceEnum", bound=Enum)

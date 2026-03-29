@@ -78,6 +78,7 @@ class Dolphin:
         self.await_load_done()
 
     def _run_env(self):
+        stdout = subprocess.DEVNULL if not self.options.verbose else None
         self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -85,7 +86,7 @@ class Dolphin:
         self.server_sock.listen(1)
 
         xvfb_command = ["Xvfb", f":{self.env_id}", "-screen", "0", "640x480x24"]
-        self.processes.append(subprocess.Popen(xvfb_command))
+        self.processes.append(subprocess.Popen(xvfb_command, stdout=stdout))
         while not os.path.exists(f"/tmp/.X11-unix/X{self.env_id}"):
             time.sleep(0.1)
 
@@ -99,7 +100,7 @@ class Dolphin:
             "-rfbport",
             str(self.vnc_port),
         ]
-        self.processes.append(subprocess.Popen(x11vnc_command))
+        self.processes.append(subprocess.Popen(x11vnc_command, stdout=stdout))
 
         websockify_command = [
             "websockify",
@@ -108,7 +109,7 @@ class Dolphin:
             str(self.novnc_port),
             f"localhost:{self.vnc_port}",
         ]
-        self.processes.append(subprocess.Popen(websockify_command))
+        self.processes.append(subprocess.Popen(websockify_command, stdout=stdout))
 
         script_path = pathlib.Path(__file__).parent.parent / "script.py"
         dolphin_command = [
@@ -127,7 +128,7 @@ class Dolphin:
         dolphin_env["DISPLAY"] = f":{self.env_id}"
         dolphin_env["ENV_ID"] = f"{self.env_id}"
         dolphin_env["NUM_AGENTS"] = f"{self.options.num_agents}"
-        dolphin_process = subprocess.Popen(dolphin_command, env=dolphin_env)
+        dolphin_process = subprocess.Popen(dolphin_command, env=dolphin_env, stdout=stdout)
         self.processes.append(dolphin_process)
 
         self.dolphin_proc_pid = dolphin_process.pid
