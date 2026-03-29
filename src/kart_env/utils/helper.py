@@ -6,10 +6,6 @@ if TYPE_CHECKING:
     from ..kart_environment import KartEnvironment
 
 
-def exec_cmd(env: KartEnvironment, command: str):
-    env.conn.sendall(b"exec" + command.encode())
-
-
 def launch_game(env: KartEnvironment, options: OptionType):
     enter_main_menu(env, options)
 
@@ -204,7 +200,9 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
                 f"but {selected_class.value} allows only: {allowed_text}."
             )
 
-        is_grid = True if options.num_agents == 1 else False  # relevant for single play. choose kart via grid
+        is_grid = (
+            True if options.num_agents == 1 else False
+        )  # relevant for single play. choose kart via grid
         if is_grid:
             start_row, start_col = (0, 0)
             target_row, target_col = VehiclePositionMap[selected_vehicle]

