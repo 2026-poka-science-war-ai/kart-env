@@ -187,3 +187,8 @@ class DolphinMem:
                 item_node = read_ptr(item_node + 0xBC)
 
         return obs
+
+    def get_stage_id(self) -> int:
+        read_ptr = self.read_ptr
+        read_u32 = self.read_u32
+        return read_u32(read_ptr(0x809BD730) + 0x28)
