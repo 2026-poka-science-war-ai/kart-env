@@ -181,8 +181,10 @@ class KartEnvironment(ParallelEnv):
         self.await_send_actions()
 
     def click(self, actions: dict[AgentID, ActionType], num_frame: int = 250):
-        self._send_actions(actions)
-        for _ in range(num_frame - 1):
+        click_frame = min(3, num_frame)
+        for _ in range(click_frame):
+            self._send_actions(actions)
+        for _ in range(num_frame - click_frame):
             self._send_actions({})
 
     def async_send_actions(self, actions: dict[AgentID, ActionType]):

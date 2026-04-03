@@ -244,12 +244,12 @@ def select_cup(env: KartEnvironment, options: OptionType):
     for _ in range(target_col):
         env.click({0: {"Right": 1}}, num_frame=10)
 
-    env.click({0: {"A": 1}}, num_frame=200)
+    env.click({0: {"A": 1}}, num_frame=100)
 
 
 def select_course(env: KartEnvironment, options: OptionType):
     target_index = CoursePositionMap[options.course]
     for _ in range(target_index):
         env.click({0: {"Down": 1}}, num_frame=10)
-    env.click({0: {"A": 1}}, num_frame=200)
+    env.click({0: {"A": 1}}, num_frame=100)
     env.click({0: {"A": 1}})
