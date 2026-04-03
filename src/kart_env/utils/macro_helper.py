@@ -894,17 +894,35 @@ class OptionType:
         ]
     )
     vehicle: list[VehicleChoice] = field(
-        default_factory=lambda: [VehicleChoice.STANDARD_KART_M] * 12
+        default_factory=lambda: [VehicleChoice.STANDARD_KART_M] * 4
     )
     drift_modes: list[DriftModeChoice] = field(
-        default_factory=lambda: [DriftModeChoice.MANUAL] * 12
+        default_factory=lambda: [DriftModeChoice.MANUAL] * 4
     )
     course: CourseChoice = CourseChoice.LUIGI_CIRCUIT
     cc: CCChoice = CCChoice.CC_100
     verbose: bool = False
 
     def __post_init__(self):
-        pass  # TODO: Add validation to ensure character and vehicle choices are compatible with num_agents and cc.
+        if not self.num_agents == len(self.character) == len(self.vehicle) == len(self.drift_modes):
+            raise ValueError(
+                "Length of character, vehicle, and drift_modes lists must match num_agents. "
+                f"{self.num_agents=}, "
+                f"{len(self.character)=}, "
+                f"{len(self.vehicle)=}, "
+                f"{len(self.drift_modes)=}."
+            )
+        for i in range(self.num_agents):
+            selected_vehicle = self.vehicle[i]
+            selected_character = self.character[i]
+            selected_vehicle_info = VehicleInfoMap[selected_vehicle]
+            target_size = get_character_size(selected_character)
+
+            if selected_vehicle_info.size is not target_size:
+                raise ValueError(
+                    f"{selected_vehicle.value} is {selected_vehicle_info.size.value} size, "
+                    f"but {selected_character.value} is {target_size.value} size."
+                )
 
 
 ChoiceEnum = TypeVar("ChoiceEnum", bound=Enum)

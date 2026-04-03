@@ -197,12 +197,6 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
         target_size = get_character_size(selected_character)
         allowed_types = get_allowed_vehicle_types(selected_class)
 
-        if selected_vehicle_info.size is not target_size:
-            raise ValueError(
-                f"{selected_vehicle.value} is {selected_vehicle_info.size.value} size, "
-                f"but {selected_character.value} is {target_size.value} size."
-            )
-
         isGrandPrix = False
         if selected_vehicle_info.vehicle_type not in allowed_types and isGrandPrix:
             allowed_text = ", ".join(
