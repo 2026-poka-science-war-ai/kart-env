@@ -66,248 +66,124 @@ class DolphinMem:
         return curr + offsets[-1]
 
     def read_obs(self, agent_n: int) -> dict:
+        # Bind methods to locals to avoid repeated attribute lookups in hot loop
+        read_ptr = self.read_ptr
+        read_u8 = self.read_u8
+        read_u16 = self.read_u16
+        read_u32 = self.read_u32
+        read_f32 = self.read_f32
+        read_fff = self.read_fff
+        read_ffff = self.read_ffff
+
+        # --- Resolve shared root pointers once ---
+        race_mgr = read_ptr(0x809BD730)
+        player_setup = read_ptr(0x809BD728)
+        kart_obj_holder = read_ptr(read_ptr(0x809C18F8) + 0x20)
+        item_holder = read_ptr(read_ptr(0x809C3618) + 0x14)
+        race_timer_list = read_ptr(race_mgr + 0xC)
+
         obs = {"RACE_INFO": {}, "PLAYER_INFO": []}
 
         obs["RACE_INFO"] = {
-            "StageID": self.read_u32(self.resolve_chain(0x809BD730, [0x28])),
-            "FrameCount": self.read_u32(self.resolve_chain(0x809BD730, [0x20])),
-            "PlayerCount": self.read_u8(0x809C38B8),
-            "CourseID": self.read_u32(self.resolve_chain(0x809BD728, [0xB68])),
-            "EngineClass": self.read_u32(self.resolve_chain(0x809BD728, [0xB6C])),
+            "StageID": read_u32(race_mgr + 0x28),
+            "FrameCount": read_u32(race_mgr + 0x20),
+            "PlayerCount": read_u8(0x809C38B8),
+            "CourseID": read_u32(player_setup + 0xB68),
+            "EngineClass": read_u32(player_setup + 0xB6C),
         }
 
+        item_node = item_holder
+
         for n in range(agent_n):
-            p_info = {}
-            p_info["PlayerID"] = n
+            # Resolve per-player base pointers once
+            race_timer_n = read_ptr(race_timer_list + 0x4 * n)
 
-            p_info["LocalPlayerNum"] = self.read_u8(
-                self.resolve_chain(0x809BD728, [0x2D + 0xF0 * n])
-            )
-            p_info["RealControllerID"] = self.read_u8(
-                self.resolve_chain(0x809BD728, [0x2E + 0xF0 * n])
-            )
-            p_info["KartID"] = self.read_u32(
-                self.resolve_chain(0x809BD728, [0x30 + 0xF0 * n])
-            )
-            p_info["CharacterID"] = self.read_u32(
-                self.resolve_chain(0x809BD728, [0x34 + 0xF0 * n])
-            )
+            kart_obj_n = read_ptr(kart_obj_holder + 0x4 * n)
+            kart_base = read_ptr(kart_obj_n + 0x0)
 
-            p_info["CurrentRaceCompletion"] = self.read_f32(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0xC])
-            )
-            p_info["MaxRaceCompletion"] = self.read_f32(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x10])
-            )
-            p_info["FirstKcpLapCompletion"] = self.read_f32(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x14])
-            )
-            p_info["NextCheckpointLapCompletion"] = self.read_f32(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x18])
-            )
-            p_info["NextCheckpointLapCompletionMax"] = self.read_f32(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x1C])
-            )
+            kart_move = read_ptr(kart_base + 0x28)
+            kart_state = read_ptr(kart_base + 0x4)
+            kart_body = read_ptr(kart_base + 0x8)
+            kart_collide = read_ptr(kart_base + 0x18)
 
-            p_info["CurrentLap"] = self.read_u16(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x24])
-            )
-            p_info["MaxLap"] = self.read_u8(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x26])
-            )
-            p_info["currentKCP"] = self.read_u8(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x27])
-            )
-            p_info["maxKCP"] = self.read_u8(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x28])
-            )
-            p_info["StateBit"] = self.read_u8(
-                self.resolve_chain(0x809BD730, [0xC, 0x4 * n, 0x3B])
-            )
+            kart_phys = read_ptr(kart_body + 0x90)
+            kart_dyn = read_ptr(kart_phys + 0x4)
+            kart_phys_col = read_ptr(kart_phys + 0x8)
+            kart_col_sub = read_ptr(kart_collide + 0x18)
 
-            p_info["SoftSpeedLimit"] = self.read_f32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x18])
-            )
-            p_info["HardSpeedLimit"] = self.read_f32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x2C])
-            )
+            kart_drift = read_ptr(kart_obj_n + 0x44)
+            kart_trick = read_ptr(kart_move + 0x258)
 
-            p_info["Position"] = tuple(
-                self.read_fff(
-                    self.resolve_chain(
-                        0x809C18F8, [0x20, 0x4 * n, 0x0, 0x8, 0x90, 0x18]
-                    )
-                )
-            )
-            p_info["Velocity"] = tuple(
-                self.read_fff(
-                    self.resolve_chain(
-                        0x809C18F8, [0x20, 0x4 * n, 0x0, 0x8, 0x90, 0x4, 0xD4]
-                    )
-                )
-            )
-            p_info["InternalVelocity"] = tuple(
-                self.read_fff(
-                    self.resolve_chain(
-                        0x809C18F8, [0x20, 0x4 * n, 0x0, 0x8, 0x90, 0x4, 0x14C]
-                    )
-                )
-            )
-            p_info["ExternalVelocity"] = tuple(
-                self.read_fff(
-                    self.resolve_chain(
-                        0x809C18F8, [0x20, 0x4 * n, 0x0, 0x8, 0x90, 0x4, 0x74]
-                    )
-                )
-            )
-            p_info["AngularVelocity"] = tuple(
-                self.read_fff(
-                    self.resolve_chain(
-                        0x809C18F8, [0x20, 0x4 * n, 0x0, 0x8, 0x90, 0x4, 0xA4]
-                    )
-                )
-            )
-            p_info["Acceleration"] = tuple(
-                self.read_fff(
-                    self.resolve_chain(
-                        0x809C18F8, [0x20, 0x4 * n, 0x0, 0x8, 0x90, 0x4, 0x80]
-                    )
-                )
-            )
+            p_off = 0xF0 * n
 
-            p_info["MainRotation"] = tuple(
-                self.read_ffff(
-                    self.resolve_chain(
-                        0x809C18F8, [0x20, 0x4 * n, 0x0, 0x8, 0x90, 0x4, 0xF0]
-                    )
-                )
-            )
+            p_info = {
+                "PlayerID": n,
+                "LocalPlayerNum": read_u8(player_setup + 0x2D + p_off),
+                "RealControllerID": read_u8(player_setup + 0x2E + p_off),
+                "KartID": read_u32(player_setup + 0x30 + p_off),
+                "CharacterID": read_u32(player_setup + 0x34 + p_off),
+                "CurrentRaceCompletion": read_f32(race_timer_n + 0xC),
+                "MaxRaceCompletion": read_f32(race_timer_n + 0x10),
+                "FirstKcpLapCompletion": read_f32(race_timer_n + 0x14),
+                "NextCheckpointLapCompletion": read_f32(race_timer_n + 0x18),
+                "NextCheckpointLapCompletionMax": read_f32(race_timer_n + 0x1C),
+                "CurrentLap": read_u16(race_timer_n + 0x24),
+                "MaxLap": read_u8(race_timer_n + 0x26),
+                "currentKCP": read_u8(race_timer_n + 0x27),
+                "maxKCP": read_u8(race_timer_n + 0x28),
+                "StateBit": read_u8(race_timer_n + 0x3B),
+                "SoftSpeedLimit": read_f32(kart_move + 0x18),
+                "HardSpeedLimit": read_f32(kart_move + 0x2C),
+                "Position": tuple(read_fff(kart_phys + 0x18)),
+                "Velocity": tuple(read_fff(kart_dyn + 0xD4)),
+                "InternalVelocity": tuple(read_fff(kart_dyn + 0x14C)),
+                "ExternalVelocity": tuple(read_fff(kart_dyn + 0x74)),
+                "AngularVelocity": tuple(read_fff(kart_dyn + 0xA4)),
+                "Acceleration": tuple(read_fff(kart_dyn + 0x80)),
+                "MainRotation": tuple(read_ffff(kart_dyn + 0xF0)),
+                "Speed": read_f32(kart_move + 0x20),
+                "AccelerationKartMove": read_f32(kart_move + 0x30),
+                "DriftState": read_u16(kart_drift + 0xFC),
+                "MiniturboCharge": read_u16(kart_drift + 0xFE),
+                "SMiniturboCharge": read_u16(kart_drift + 0x100),
+                "OffroadInvincibilityTimer": read_u16(kart_move + 0x148),
+                "WheelieFrameCount": read_u32(kart_move + 0x2A8),
+                "WheelieCooldownCount": read_u16(kart_move + 0x2B6),
+                "LeanRot": read_f32(kart_move + 0x294),
+                "BitField0": read_u32(kart_state + 0x4),
+                "BitField1": read_u32(kart_state + 0x8),
+                "BitField2": read_u32(kart_state + 0xC),
+                "BitField3": read_u32(kart_state + 0x10),
+                "SurfaceFlag": read_u32(kart_col_sub + 0x2C),
+                "Hop": tuple(read_fff(kart_move + 0x228)),
+                "MTBoostTimer": read_u16(kart_move + 0x102),
+                "AllMTCharge": read_u16(kart_move + 0x10C),
+                "MushroomBoostTimer": read_u16(kart_move + 0x110),
+                "TrickableTimer": read_u16(kart_state + 0xA6),
+                "TrickCooldown": read_u16(kart_trick + 0x38),
+                "AirtimeCount": read_u32(kart_state + 0x1C),
+                "RacePosition": read_u8(kart_collide + 0x3C),
+                "FloorCollisionCount": read_u16(kart_collide + 0x40),
+                "RespawnTimer": read_u16(kart_col_sub + 0x48),
+                "WallCollideFlag": read_u32(kart_phys_col + 0x8),
+                "Item": read_u32(item_node + 0x8C),
+                "ItemNum": read_u32(item_node + 0x90),
+                "PassiveItem": read_u32(item_node + 0xCC),
+                "PassiveItemNum": read_u32(item_node + 0x104),
+                "StarTimer": read_u16(kart_move + 0x18A),
+                "ShockTimer": read_u16(kart_move + 0x18C),
+                "BlooperInkTimer": read_u16(kart_move + 0x18E),
+                "BlooperStateFlag": read_u8(kart_move + 0x190),
+                "CrushTimer": read_u16(kart_move + 0x192),
+                "MegaTimer": read_u16(kart_move + 0x194),
+                "startBoostCharge": read_f32(kart_state + 0x9C),
+                "startBoostIdx": read_u32(kart_state + 0xA0),
+            }
 
-            p_info["Speed"] = self.read_f32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x20])
-            )
-            p_info["AccelerationKartMove"] = self.read_f32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x30])
-            )
-
-            p_info["DriftState"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x44, 0xFC])
-            )
-            p_info["MiniturboCharge"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x44, 0xFE])
-            )
-            p_info["SMiniturboCharge"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x44, 0x100])
-            )
-
-            p_info["OffroadInvincibilityTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x148])
-            )
-
-            p_info["WheelieFrameCount"] = self.read_u32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x2A8])
-            )
-            p_info["WheelieCooldownCount"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x2B6])
-            )
-            p_info["LeanRot"] = self.read_f32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x294])
-            )
-
-            p_info["BitField0"] = self.read_u32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0x4])
-            )
-            p_info["BitField1"] = self.read_u32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0x8])
-            )
-            p_info["BitField2"] = self.read_u32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0xC])
-            )
-            p_info["BitField3"] = self.read_u32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0x10])
-            )
-            p_info["SurfaceFlag"] = self.read_u32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x18, 0x18, 0x2C])
-            )
-
-            p_info["Hop"] = tuple(
-                self.read_fff(
-                    self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x228])
-                )
-            )
-
-            p_info["MTBoostTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x102])
-            )
-            p_info["AllMTCharge"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x10C])
-            )
-            p_info["MushroomBoostTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x110])
-            )
-            p_info["TrickableTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0xA6])
-            )
-            p_info["TrickCooldown"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x258, 0x38])
-            )
-            p_info["AirtimeCount"] = self.read_u32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0x1C])
-            )
-
-            p_info["RacePosition"] = self.read_u8(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x18, 0x3C])
-            )
-            p_info["FloorCollisionCount"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x18, 0x40])
-            )
-            p_info["RespawnTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x18, 0x18, 0x48])
-            )
-            p_info["WallCollideFlag"] = self.read_u32(
-                self.resolve_chain(
-                    0x809C18F8, [0x20, 0x4 * n, 0x0, 0x8, 0x90, 0x8, 0x8]
-                )
-            )
-
-            p_info["Item"] = self.read_u32(
-                self.resolve_chain(0x809C3618, [0x14] + [0xBC] * n + [0x8C])
-            )
-            p_info["ItemNum"] = self.read_u32(
-                self.resolve_chain(0x809C3618, [0x14] + [0xBC] * n + [0x90])
-            )
-            p_info["PassiveItem"] = self.read_u32(
-                self.resolve_chain(0x809C3618, [0x14] + [0xBC] * n + [0xCC])
-            )
-            p_info["PassiveItemNum"] = self.read_u32(
-                self.resolve_chain(0x809C3618, [0x14] + [0xBC] * n + [0x104])
-            )
-
-            p_info["StarTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x18A])
-            )
-            p_info["ShockTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x18C])
-            )
-            p_info["BlooperInkTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x18E])
-            )
-            p_info["BlooperStateFlag"] = self.read_u8(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x190])
-            )
-            p_info["CrushTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x192])
-            )
-            p_info["MegaTimer"] = self.read_u16(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x28, 0x194])
-            )
-
-            p_info["startBoostCharge"] = self.read_f32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0x9C])
-            )
-            p_info["startBoostIdx"] = self.read_u32(
-                self.resolve_chain(0x809C18F8, [0x20, 0x4 * n, 0x0, 0x4, 0xA0])
-            )
             obs["PLAYER_INFO"].append(p_info)
+
+            # Walk item linked list to next node
+            if n < agent_n - 1:
+                item_node = read_ptr(item_node + 0xBC)
 
         return obs
