@@ -201,7 +201,7 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
             )
 
         is_grid = (
-            True if options.num_agents == 1 else False
+            True if options.num_agents == 1 or options.online_mode else False
         )  # relevant for single play. choose kart via grid
         if is_grid:
             start_row, start_col = (0, 0)
@@ -244,7 +244,7 @@ def select_cup(env: KartEnvironment, options: OptionType):
     for _ in range(target_col):
         env.click({0: {"Right": 1}}, num_frame=10)
 
-    env.click({0: {"A": 1}}, num_frame=150)
+    env.click({0: {"A": 1}}, num_frame=200)
 
 
 def select_course(env: KartEnvironment, options: OptionType):
