@@ -236,7 +236,7 @@ def select_vehicle(env: KartEnvironment, options: OptionType):
 
 
 def select_cup(env: KartEnvironment, options: OptionType):
-    target_row, target_col = CupPositionMap[options.cup]
+    target_row, target_col = CupPositionMap[Course2CupMap[options.course]]
 
     for _ in range(target_row):
         env.click({0: {"Down": 1}}, num_frame=10)

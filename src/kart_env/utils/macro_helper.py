@@ -827,6 +827,48 @@ CoursePositionMap = {
     CourseChoice.N64_BOWSERS_CASTLE: 3,
 }
 
+Course2CupMap = {
+    CourseChoice.LUIGI_CIRCUIT: CupChoice.MUSHROOM_CUP,
+    CourseChoice.MOO_MOO_MEADOWS: CupChoice.MUSHROOM_CUP,
+    CourseChoice.MUSHROOM_GORGE: CupChoice.MUSHROOM_CUP,
+    CourseChoice.TOADS_FACTORY: CupChoice.MUSHROOM_CUP,
+
+    CourseChoice.MARIO_CIRCUIT: CupChoice.FLOWER_CUP,
+    CourseChoice.COCONUT_MALL: CupChoice.FLOWER_CUP,
+    CourseChoice.DK_SUMMIT: CupChoice.FLOWER_CUP,
+    CourseChoice.WARIOS_GOLD_MINE: CupChoice.FLOWER_CUP,
+
+    CourseChoice.DAISY_CIRCUIT: CupChoice.STAR_CUP,
+    CourseChoice.KOOPA_CAPE: CupChoice.STAR_CUP,
+    CourseChoice.MAPLE_TREEWAY: CupChoice.STAR_CUP,
+    CourseChoice.GRUMBLE_VOLCANO: CupChoice.STAR_CUP,
+
+    CourseChoice.DRY_DRY_RUINS: CupChoice.SPECIAL_CUP,
+    CourseChoice.MOONVIEW_HIGHWAY: CupChoice.SPECIAL_CUP,
+    CourseChoice.BOWSERS_CASTLE: CupChoice.SPECIAL_CUP,
+    CourseChoice.RAINBOW_ROAD: CupChoice.SPECIAL_CUP,
+
+    CourseChoice.GCN_PEACH_BEACH: CupChoice.SHELL_CUP,
+    CourseChoice.DS_YOSHI_FALLS: CupChoice.SHELL_CUP,
+    CourseChoice.SNES_GHOST_VALLEY_2: CupChoice.SHELL_CUP,
+    CourseChoice.N64_MARIO_RACEWAY: CupChoice.SHELL_CUP,
+
+    CourseChoice.N64_SHERBET_LAND: CupChoice.BANANA_CUP,
+    CourseChoice.GBA_SHY_GUY_BEACH: CupChoice.BANANA_CUP,
+    CourseChoice.DS_DELFINO_SQUARE: CupChoice.BANANA_CUP,
+    CourseChoice.GCN_WALUIGI_STADIUM: CupChoice.BANANA_CUP,
+
+    CourseChoice.DS_DESERT_STREET: CupChoice.LEAF_CUP,
+    CourseChoice.GBA_BOWSER_CASTLE_3: CupChoice.LEAF_CUP,
+    CourseChoice.N64_DKS_JUNGLE_PARKWAY: CupChoice.LEAF_CUP,
+    CourseChoice.GCN_MARIO_CIRCUIT: CupChoice.LEAF_CUP,
+
+    CourseChoice.SNES_MARIO_CIRCUIT_3: CupChoice.LIGHTNING_CUP,
+    CourseChoice.DS_PEACH_GARDENS: CupChoice.LIGHTNING_CUP,
+    CourseChoice.GCN_DK_MOUNTAIN: CupChoice.LIGHTNING_CUP,
+    CourseChoice.N64_BOWSERS_CASTLE: CupChoice.LIGHTNING_CUP,
+}
+
 
 class CCChoice(Enum):
     CC_50 = "50cc"
@@ -857,7 +899,6 @@ class OptionType:
     drift_modes: list[DriftModeChoice] = field(
         default_factory=lambda: [DriftModeChoice.MANUAL] * 12
     )
-    cup: CupChoice = CupChoice.MUSHROOM_CUP
     course: CourseChoice = CourseChoice.LUIGI_CIRCUIT
     cc: CCChoice = CCChoice.CC_100
     verbose: bool = False
