@@ -38,7 +38,7 @@ class Dolphin:
         self.dolphin_proc_pid: int | None = None
 
         if not self.user_dir.exists():
-            dolphin_settings_path = pathlib.Path(__file__).parent / "dolphin_settings"
+            dolphin_settings_path = pathlib.Path(__file__).parent.parent / "dolphin_settings"
             shutil.copytree(dolphin_settings_path, self.user_dir)
             self.options.is_license_created = False
 
