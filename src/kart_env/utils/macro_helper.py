@@ -661,7 +661,10 @@ VehicleChoiceGrid = {
                 VehicleChoice.BOWSER_BIKE,
                 VehicleChoice.WARIO_BIKE,
             ),
-            (VehicleChoice.TWINKLE_STAR, VehicleChoice.TORPEDO, VehicleChoice.PHANTOM),
+            (   VehicleChoice.TWINKLE_STAR, 
+                VehicleChoice.TORPEDO, 
+                VehicleChoice.PHANTOM
+            ),
         ),
     },
 }
@@ -713,13 +716,31 @@ VehicleChoiceQueue = {
 }
 
 
-VehiclePositionMap = {
-    vehicle_choice: (row, col)
-    for size_grid in VehicleChoiceGrid.values()
-    for type_grid in size_grid.values()
-    for col, vehicle_col in enumerate(type_grid)
-    for row, vehicle_choice in enumerate(vehicle_col)
-}
+# VehiclePositionMap = {
+#     vehicle_choice: (row, col)
+#     for size_grid in VehicleChoiceGrid.values()
+#     for type_grid in size_grid.values()
+#     for col, vehicle_col in enumerate(type_grid)
+#     for row, vehicle_choice in enumerate(vehicle_col)
+# }
+
+VehiclePositionMap = {}
+
+for size_grid in VehicleChoiceGrid.values():
+    kart_grid = size_grid[VehicleType.KART]
+    bike_grid = size_grid[VehicleType.BIKE]
+
+    # KART (col=0)
+    for col, vehicle_col in enumerate(kart_grid):
+        for row, vehicle in enumerate(vehicle_col):
+            ui_row = row + col * 3
+            VehiclePositionMap[vehicle] = (ui_row, 0)
+
+    # BIKE (col=1)
+    for col, vehicle_col in enumerate(bike_grid):
+        for row, vehicle in enumerate(vehicle_col):
+            ui_row = row + col * 3
+            VehiclePositionMap[vehicle] = (ui_row, 1)
 
 
 class DriftModeChoice(Enum):
@@ -885,25 +906,55 @@ class OptionType:
     )
     is_license_created: bool = True
     race: RaceChoice = RaceChoice.SOLO_RACE
-    character: list[CharacterChoice] = field(
-        default_factory=lambda: [
-            CharacterChoice.MARIO,
-            CharacterChoice.LUIGI,
-            CharacterChoice.YOSHI,
-            CharacterChoice.PEACH,
-        ]
-    )
-    vehicle: list[VehicleChoice] = field(
-        default_factory=lambda: [VehicleChoice.STANDARD_KART_M] * 4
-    )
-    drift_modes: list[DriftModeChoice] = field(
-        default_factory=lambda: [DriftModeChoice.MANUAL] * 4
-    )
+    character: list[CharacterChoice] = None
+    vehicle: list[VehicleChoice] = None
+    drift_modes: list[DriftModeChoice] = None
     course: CourseChoice = CourseChoice.LUIGI_CIRCUIT
     cc: CCChoice = CCChoice.CC_100
     verbose: bool = False
 
     def __post_init__(self):
+        if not self.vehicle:
+            self.vehicle = [VehicleChoice.BON_BON] * self.num_agents
+        if not self.drift_modes:
+            self.drift_modes = [DriftModeChoice.MANUAL] * self.num_agents
+        
+        if self.num_agents == 1:
+            if not self.character:
+                self.character = [
+                        CharacterChoice.MARIO,
+                    ]
+        elif self.num_agents == 4:
+            if not self.character:
+                self.character = [
+                        CharacterChoice.MARIO,
+                        CharacterChoice.LUIGI,
+                        CharacterChoice.YOSHI,
+                        CharacterChoice.PEACH,
+                    ]
+        elif self.num_agents == 12:
+            if not self.character:
+                self.character = [
+                        CharacterChoice.MARIO,
+                        CharacterChoice.LUIGI,
+                        CharacterChoice.YOSHI,
+                        CharacterChoice.PEACH,
+                        CharacterChoice.BABY_MARIO,
+                        CharacterChoice.BABY_LUIGI,
+                        CharacterChoice.BABY_PEACH,
+                        CharacterChoice.BABY_DAISY,
+                        CharacterChoice.TOAD,
+                        CharacterChoice.TOADETTE,
+                        CharacterChoice.KOOPA_TROOPA,
+                        CharacterChoice.DRY_BONES,
+                        CharacterChoice.DAISY,
+                        CharacterChoice.BIRDO,
+                        CharacterChoice.DIDDY_KONG,
+                        CharacterChoice.BOWSER_JR,
+                    ]
+        else:
+            raise ValueError(f"num_agents should be 1, 4, or 12, but it is {self.num_agents}")
+        
         if not self.num_agents == len(self.character) == len(self.vehicle) == len(self.drift_modes):
             raise ValueError(
                 "Length of character, vehicle, and drift_modes lists must match num_agents. "
