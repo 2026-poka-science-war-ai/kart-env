@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 show_intro = False
 
 def launch_game(env: KartEnvironment, options: OptionType):
+    # env.click({}, num_frame=999999999999)
     enter_main_menu(env, options)
 
     if not options.online_mode:
@@ -44,7 +45,11 @@ def _launch_game_1p(env: KartEnvironment, options: OptionType):
     env.click({0: {"Down": 1}}, num_frame=10)
     env.click({0: {"A": 1}}, num_frame=100)  # select VS Race in ["VS Race", "Battle"]
 
-    # TODO: setting rules (CC, CPU, etc.) in the future
+    # setting rules (CC, CPU, etc.)
+    env.click({0: {"Up": 1}}, num_frame=10)
+    env.click({0: {"A": 1}}, num_frame=100)
+    select_rules(env, options)
+    env.click({0: {"Down": 1}}, num_frame=10)
 
     if options.race == RaceChoice.SOLO_RACE:
         env.click({0: {"A": 1}})
@@ -93,7 +98,11 @@ def _launch_game_4p(env: KartEnvironment, options: OptionType):
 
     env.click({0: {"A": 1}}, num_frame=100)  # select VS Race in ["VS Race", "Battle"]
 
-    # TODO: setting rules (CC, CPU, etc.) in the future
+    # setting rules (CC, CPU, etc.)
+    env.click({0: {"Up": 1}}, num_frame=10)
+    env.click({0: {"A": 1}}, num_frame=100)
+    select_rules(env, options)
+    env.click({0: {"Down": 1}}, num_frame=10)
 
     if options.race == RaceChoice.SOLO_RACE:
         env.click({0: {"A": 1}})
@@ -260,3 +269,30 @@ def select_course(env: KartEnvironment, options: OptionType):
         env.click({0: {"Down": 1}}, num_frame=10)
     env.click({0: {"A": 1}}, num_frame=100)
     env.click({0: {"A": 1}})
+
+
+def select_rules(env: KartEnvironment, options: OptionType):
+    selected_class = coerce_choice(options.cc, CCChoice)
+    selected_cpu = coerce_choice(options.cpu, CPUChoice)
+    selected_vehicle_rule = coerce_choice(options.vehicle_rule, VehicleRuleChoice)
+    selected_course_rule = coerce_choice(options.course_rule, CourseRuleChoice)
+    selected_item_rule = coerce_choice(options.item_rule, ItemRuleChoice)
+    selected_races = coerce_choice(options.races, RacesChoice)
+
+    start_col_map = {'class': 1, 'cpu': 1, 'vehicle_rule': 0, 'course_rule': 0, 'item_rule': 0, 'races': 2}
+    selected_rule_map = {'class': selected_class, 'cpu': selected_cpu, 'vehicle_rule': selected_vehicle_rule, 'course_rule': selected_course_rule, 'item_rule': selected_item_rule, 'races': selected_races}
+    
+    # class
+    for selected_rule_name in selected_rule_map.keys():
+        selected_rule = selected_rule_map[selected_rule_name]
+
+        start_col = start_col_map[selected_rule_name]
+        _, target_col = RulesPositionMap[selected_rule]
+        col_shift = target_col - start_col
+
+        horizontal_move_key = "Left" if col_shift <= 0 else "Right"
+        for _ in range(abs(col_shift)):
+            env.click({0: {horizontal_move_key: 1}}, num_frame=40)
+        env.click({0: {"A": 1}}, num_frame=40)
+    
+    env.click({0: {"A": 1}}, num_frame=100)

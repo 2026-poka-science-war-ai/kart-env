@@ -715,15 +715,6 @@ VehicleChoiceQueue = {
     ],
 }
 
-
-# VehiclePositionMap = {
-#     vehicle_choice: (row, col)
-#     for size_grid in VehicleChoiceGrid.values()
-#     for type_grid in size_grid.values()
-#     for col, vehicle_col in enumerate(type_grid)
-#     for row, vehicle_choice in enumerate(vehicle_col)
-# }
-
 VehiclePositionMap = {}
 
 for size_grid in VehicleChoiceGrid.values():
@@ -891,11 +882,101 @@ Course2CupMap = {
 }
 
 
+class RuleRow(Enum):
+    CLASS = "Class"
+    CPU = "CPU"
+    VEHICLES = "Vehicles"
+    COURSE = "Course"
+    ITEMS = "Items"
+    RACES = "Races"
+    OK = "OK"
+
 class CCChoice(Enum):
     CC_50 = "50cc"
     CC_100 = "100cc"
     CC_150 = "150cc"
     MIRROR = "mirror"
+
+class CPUChoice(Enum):
+    EASY = "Easy"
+    NORMAL = "Normal"
+    HARD = "Hard"
+    OFF = "Off"
+
+class VehicleRuleChoice(Enum):
+    ALL = "All"
+    KARTS = "Karts"
+    BIKES = "Bikes"
+
+class CourseRuleChoice(Enum):
+    CHOOSE = "Choose"
+    RANDOM = "Random"
+    IN_ORDER = "In Order"
+
+class ItemRuleChoice(Enum):
+    RECOMMENDED = "Recommended"
+    FRANTIC = "Frantic"
+    BASIC = "Basic"
+    NONE = "None"
+
+class RacesChoice(Enum):
+    RACES_2 = 2
+    RACES_3 = 3
+    RACES_4 = 4
+    RACES_5 = 5
+    RACES_8 = 8
+    RACES_10 = 10
+    RACES_12 = 12
+    RACES_16 = 16
+    RACES_32 = 32
+
+RulesGrid = {
+    RuleRow.CLASS: (
+        CCChoice.CC_50,
+        CCChoice.CC_100,
+        CCChoice.CC_150,
+        CCChoice.MIRROR,
+    ),
+    RuleRow.CPU: (
+        CPUChoice.EASY,
+        CPUChoice.NORMAL,
+        CPUChoice.HARD,
+        CPUChoice.OFF,
+    ),
+    RuleRow.VEHICLES: (
+        VehicleRuleChoice.ALL,
+        VehicleRuleChoice.KARTS,
+        VehicleRuleChoice.BIKES,
+    ),
+    RuleRow.COURSE: (
+        CourseRuleChoice.CHOOSE,
+        CourseRuleChoice.RANDOM,
+        CourseRuleChoice.IN_ORDER,
+    ),
+    RuleRow.ITEMS: (
+        ItemRuleChoice.RECOMMENDED,
+        ItemRuleChoice.FRANTIC,
+        ItemRuleChoice.BASIC,
+        ItemRuleChoice.NONE,
+    ),
+    RuleRow.RACES: (
+        RacesChoice.RACES_2,
+        RacesChoice.RACES_3,
+        RacesChoice.RACES_4,
+        RacesChoice.RACES_5,
+        RacesChoice.RACES_8,
+        RacesChoice.RACES_10,
+        RacesChoice.RACES_12,
+        RacesChoice.RACES_16,
+        RacesChoice.RACES_32,
+    ),
+}
+
+RulesPositionMap = {
+    choice: (row_idx, col_idx)
+    for row_idx, row_choices in enumerate(RulesGrid.values())
+    for col_idx, choice in enumerate(row_choices)
+}
 
 
 @dataclass
@@ -911,6 +992,11 @@ class OptionType:
     drift_modes: list[DriftModeChoice] = None
     course: CourseChoice = CourseChoice.LUIGI_CIRCUIT
     cc: CCChoice = CCChoice.CC_100
+    cpu: CPUChoice = CPUChoice.NORMAL
+    vehicle_rule: VehicleRuleChoice = VehicleRuleChoice.ALL
+    course_rule: CourseRuleChoice = CourseRuleChoice.CHOOSE
+    item_rule: ItemRuleChoice = ItemRuleChoice.RECOMMENDED
+    races: RacesChoice = RacesChoice.RACES_4
     verbose: bool = False
 
     def __post_init__(self):
