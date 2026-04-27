@@ -114,15 +114,11 @@ RUN cd /dolphin-src && \
     make install && \
     cd / && rm -rf /dolphin-src
 
-RUN uv venv /opt/venv
-ENV VIRTUAL_ENV=/opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
 WORKDIR /kart_env
 COPY pyproject.toml uv.lock .python-version ./
-RUN uv pip install -r pyproject.toml
+RUN uv pip install --system --break-system-packages -r pyproject.toml
 COPY src ./src
-RUN uv pip install -e .
+RUN uv pip install --system --break-system-packages -e .
 
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
 
