@@ -6,15 +6,12 @@ services:
       additional_contexts:
         dolphin-src: ../dolphin
     image: kart_env
-    # container_name: kart_env
-    ports:
-      - "6080-6091:6080-6091" # Assume we use 12 clients in a container
     volumes:
       - ./src:/kart_env/src
       - ./main.py:/workspace/main.py
       - ../MarioKartWii.iso:/workspace/MarioKartWii.iso:ro
       - ./users:/workspace/users
-    ipc: host
+    shm_size: "2gb"
     ulimits:
       memlock: -1
       stack: 67108864

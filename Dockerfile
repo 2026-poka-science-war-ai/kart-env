@@ -127,4 +127,3 @@ RUN uv pip install -e .
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
 
 WORKDIR /workspace
-COPY main.py .

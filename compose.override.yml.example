@@ -1,1 +1,5 @@
 name: kart-env-your-name
+services:
+  kart_env:
+    ports:
+      - "6080:6080"
