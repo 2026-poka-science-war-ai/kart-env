@@ -27,27 +27,3 @@ services:
     tty: true
     cap_add:
       - SYS_PTRACE
-    extra_hosts:
-      - "gamestats.gs.nintendowifi.net:146.56.169.123"
-      - "gamestats2.gs.nintendowifi.net:146.56.169.123"
-      - "gpcm.gs.nintendowifi.net:146.56.169.123"
-      - "gpsp.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.available.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.gamestats.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.gamestats2.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.master.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.ms19.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.natneg1.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.natneg2.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.natneg3.gs.nintendowifi.net:146.56.169.123"
-      - "mariokartwii.sake.gs.nintendowifi.net:146.56.169.123"
-      - "naswii.nintendowifi.net:146.56.169.123"
-      - "nas.nintendowifi.net:146.56.169.123"
-      - "nintendowifi.net:146.56.169.123"
-      - "wiimmfi.de:146.56.169.123"
-    networks:
-      - kart_net
-
-networks:
-  kart_net:
-    driver: bridge
