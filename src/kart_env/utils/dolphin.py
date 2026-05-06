@@ -38,7 +38,9 @@ class Dolphin:
         self.dolphin_proc_pid: int | None = None
 
         if not self.user_dir.exists():
-            dolphin_settings_path = pathlib.Path(__file__).parent.parent / "dolphin_settings"
+            dolphin_settings_path = (
+                pathlib.Path(__file__).parent.parent / "dolphin_settings"
+            )
             shutil.copytree(dolphin_settings_path, self.user_dir)
             self.options.is_license_created = False
 
@@ -92,7 +94,15 @@ class Dolphin:
         self.server_sock.bind(("localhost", self.sock_port))
         self.server_sock.listen(1)
 
-        xvfb_command = ["Xvfb", f":{self.instance_id}", "-screen", "0", "640x480x24"]
+        xvfb_command = [
+            "Xvfb",
+            f":{self.instance_id}",
+            "-screen",
+            "0",
+            "640x480x24",
+            "-extension",
+            "GLX",
+        ]
         self.processes.append(subprocess.Popen(xvfb_command, stdout=stdout))
         while not os.path.exists(f"/tmp/.X11-unix/X{self.instance_id}"):
             time.sleep(0.1)
