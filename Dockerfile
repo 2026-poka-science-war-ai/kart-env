@@ -1,10 +1,10 @@
-FROM pytorch/pytorch:2.10.0-cuda12.8-cudnn9-devel
+FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
 
 RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     sed -i 's/security.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    locales wget xvfb x11vnc novnc websockify git \
+    locales wget xvfb x11vnc novnc websockify git gcc g++ make python3-dev cmake \
     # PkgConfig
     pkg-config \
     # OpenGL
@@ -95,7 +95,10 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     && rm virtualgl_3.1.4_amd64.deb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && locale-gen en_US.UTF-8
+    && locale-gen en_US.UTF-8 && \
+    wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run && \
+    sh cuda_11.8.0_520.61.05_linux.run --override --silent --toolkit && \
+    rm cuda_11.8.0_520.61.05_linux.run
 
 COPY --from=dolphin-src / /dolphin-src
 RUN cd /dolphin-src && \
@@ -105,6 +108,8 @@ RUN cd /dolphin-src && \
         submodule update --init --recursive && \
     mkdir build && cd build && \
     cmake .. \
+        -DUSE_SYSTEM_SDL3=OFF \
+        -DUSE_SYSTEM_FMT=OFF \
         -DUSE_SYSTEM_MINIZIP-NG=OFF \
         -DUSE_SYSTEM_SFML=OFF \
         -DUSE_SYSTEM_MBEDTLS=OFF \
@@ -113,6 +118,8 @@ RUN cd /dolphin-src && \
     make -j$(nproc) && \
     make install && \
     cd / && rm -rf /dolphin-src
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /kart_env
 COPY pyproject.toml uv.lock .python-version ./
