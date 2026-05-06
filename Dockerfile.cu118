@@ -120,7 +120,6 @@ RUN cd /dolphin-src && \
     cd / && rm -rf /dolphin-src
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-RUN uv pip install --system --break-system-packages torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu118
 
 WORKDIR /kart_env
 COPY pyproject.toml uv.lock .python-version ./
