@@ -127,6 +127,4 @@ RUN uv pip install --system --break-system-packages -r pyproject.toml
 COPY src ./src
 RUN uv pip install --system --break-system-packages -e .
 
-ENV NVIDIA_DRIVER_CAPABILITIES="all"
-
 WORKDIR /workspace
