@@ -249,7 +249,7 @@ class KartEnvironment(ParallelEnv):
     # fmt: off
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent) -> spaces.Space:  # type: ignore
-        max_h, max_w = 480, 640
+        max_h, max_w = 456, 608
         image_space = spaces.Box(low=0, high=255, shape=(max_h, max_w, 4), dtype=np.uint8)
 
         return spaces.Dict({
