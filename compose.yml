@@ -12,7 +12,7 @@ services:
       - ../MarioKartWii.iso:/workspace/MarioKartWii.iso:ro
       - ./users:/workspace/users
       - ./states:/workspace/states
-    shm_size: "2gb"
+    shm_size: "6gb"
     ulimits:
       memlock: -1
       stack: 67108864
