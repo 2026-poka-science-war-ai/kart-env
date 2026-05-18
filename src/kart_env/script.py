@@ -3,6 +3,7 @@ import socket
 import struct
 import os
 
+await event.frameadvance()
 env_id = int(os.environ["ENV_ID"])
 num_agents = int(os.environ["NUM_AGENTS"])
 port = 9999 + env_id
