@@ -44,7 +44,7 @@ class KartEnvironment(ParallelEnv):
         if not user_dir.exists():
             dolphin_settings_path = pathlib.Path(__file__).parent / "dolphin_settings"
             shutil.copytree(dolphin_settings_path, user_dir)
-            self.options.is_license_created = False
+            self.is_license_created = False
 
         vnc_port = VNC_BASE + self.env_id
         novnc_port = NOVNC_BASE + self.env_id

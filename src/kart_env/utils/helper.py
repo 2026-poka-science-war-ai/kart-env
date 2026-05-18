@@ -34,7 +34,7 @@ def launch_game(env: KartEnvironment, options: OptionType):
         env.load_file(str(state_path))
         return
 
-    enter_main_menu(env, options)
+    enter_main_menu(env)
 
     if not options.online_mode:
         match options.num_agents:
@@ -52,12 +52,12 @@ def launch_game(env: KartEnvironment, options: OptionType):
     env.save_file(str(state_path))
 
 
-def enter_main_menu(env: KartEnvironment, options: OptionType) -> None:
+def enter_main_menu(env: KartEnvironment) -> None:
     all_A = {agent_id: {"A": 1} for agent_id in env.agents}
     env.click({}, num_frame=500)
     env.click(all_A, num_frame=500)
 
-    if options.is_license_created:
+    if env.is_license_created:
         for _ in range(2):
             env.click(all_A)
     else:
