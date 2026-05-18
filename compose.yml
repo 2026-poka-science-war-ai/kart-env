@@ -11,6 +11,7 @@ services:
       - ./main.py:/workspace/main.py
       - ../MarioKartWii.iso:/workspace/MarioKartWii.iso:ro
       - ./users:/workspace/users
+      - ./states:/workspace/states
     shm_size: "2gb"
     ulimits:
       memlock: -1

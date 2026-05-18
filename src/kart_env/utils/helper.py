@@ -1,5 +1,10 @@
 from __future__ import annotations
+
+import hashlib
+import json
+import pathlib
 from typing import TYPE_CHECKING
+
 from .macro_helper import *
 
 if TYPE_CHECKING:
@@ -7,8 +12,30 @@ if TYPE_CHECKING:
 
 show_intro = False
 
+
+def _options_to_dict(options: OptionType) -> dict:
+    result = {}
+    for key, value in options.__dict__.items():
+        if isinstance(value, list):
+            result[key] = [item.name for item in value]
+        elif isinstance(value, Enum):
+            result[key] = value.name
+        else:
+            result[key] = value
+    return result
+
+
 def launch_game(env: KartEnvironment, options: OptionType):
-    # env.click({}, num_frame=999999999999)
+    options_dict = _options_to_dict(options)
+    options_json = json.dumps(options_dict, sort_keys=True)
+    options_hash = hashlib.md5(options_json.encode("utf-8")).hexdigest()
+    states_dir = pathlib.Path("./states")
+    states_dir.mkdir(parents=True, exist_ok=True)
+    state_path = states_dir / f"kart_env_{options_hash}.state"
+    if state_path.exists():
+        env.load_file(str(state_path))
+        return
+
     enter_main_menu(env, options)
 
     if not options.online_mode:
@@ -23,6 +50,8 @@ def launch_game(env: KartEnvironment, options: OptionType):
                 raise NotImplementedError("Only 1, 4, 12 agents are supported now.")
     else:
         _launch_game_wfc(env, options)
+
+    env.save_file(str(state_path))
 
 
 def enter_main_menu(env: KartEnvironment, options: OptionType) -> None:
@@ -279,9 +308,23 @@ def select_rules(env: KartEnvironment, options: OptionType):
     selected_item_rule = coerce_choice(options.item_rule, ItemRuleChoice)
     selected_races = coerce_choice(options.races, RacesChoice)
 
-    start_col_map = {'class': 1, 'cpu': 1, 'vehicle_rule': 0, 'course_rule': 0, 'item_rule': 0, 'races': 2}
-    selected_rule_map = {'class': selected_class, 'cpu': selected_cpu, 'vehicle_rule': selected_vehicle_rule, 'course_rule': selected_course_rule, 'item_rule': selected_item_rule, 'races': selected_races}
-    
+    start_col_map = {
+        "class": 1,
+        "cpu": 1,
+        "vehicle_rule": 0,
+        "course_rule": 0,
+        "item_rule": 0,
+        "races": 2,
+    }
+    selected_rule_map = {
+        "class": selected_class,
+        "cpu": selected_cpu,
+        "vehicle_rule": selected_vehicle_rule,
+        "course_rule": selected_course_rule,
+        "item_rule": selected_item_rule,
+        "races": selected_races,
+    }
+
     # class
     for selected_rule_name in selected_rule_map.keys():
         selected_rule = selected_rule_map[selected_rule_name]
@@ -294,5 +337,5 @@ def select_rules(env: KartEnvironment, options: OptionType):
         for _ in range(abs(col_shift)):
             env.click({0: {horizontal_move_key: 1}}, num_frame=40)
         env.click({0: {"A": 1}}, num_frame=40)
-    
+
     env.click({0: {"A": 1}}, num_frame=100)

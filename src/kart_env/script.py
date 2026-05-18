@@ -3,9 +3,9 @@ import socket
 import struct
 import os
 
-instance_id = int(os.environ["INSTANCE_ID"])
+env_id = int(os.environ["ENV_ID"])
 num_agents = int(os.environ["NUM_AGENTS"])
-port = 9999 + instance_id
+port = 9999 + env_id
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(("localhost", port))
 
@@ -15,6 +15,7 @@ AGENT_SIZE = struct.calcsize(AGENT_STRUCT)
 
 red = 0xFFFF0000
 frame_counter = 0
+
 while True:
     data = sock.recv(1024)
     payload = data[4:]
@@ -73,5 +74,4 @@ while True:
         sock.sendall(b"load_done")
 
     frame_counter += 1
-    # draw on screen
     gui.draw_text((10, 10), red, f"Frame: {frame_counter}")
