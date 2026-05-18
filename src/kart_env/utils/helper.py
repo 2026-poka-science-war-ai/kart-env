@@ -10,8 +10,6 @@ from .macro_helper import *
 if TYPE_CHECKING:
     from ..kart_environment import KartEnvironment
 
-show_intro = False
-
 
 def _options_to_dict(options: OptionType) -> dict:
     result = {}
@@ -105,13 +103,7 @@ def _launch_game_1p(env: KartEnvironment, options: OptionType):
 
     select_course(env, options)
 
-    if not show_intro:
-        env.click({}, num_frame=200)
-
-        while env.dolphins_mem[0].get_stage_id() == 0:
-            env.click({0: {"A": 1}}, num_frame=1)
-    else:
-        env.click({}, num_frame=1250)
+    env.click({}, num_frame=1250)
 
 
 def _launch_game_4p(env: KartEnvironment, options: OptionType):
@@ -160,13 +152,7 @@ def _launch_game_4p(env: KartEnvironment, options: OptionType):
 
     select_course(env, options)
 
-    if not show_intro:
-        env.click({}, num_frame=200)
-
-        while env.dolphins_mem[0].get_stage_id() == 0:
-            env.click({0: {"A": 1}}, num_frame=1)
-    else:
-        env.click({}, num_frame=1250)
+    env.click({}, num_frame=1250)
 
 
 def _launch_game_wfc(env: KartEnvironment, options: OptionType):
