@@ -661,10 +661,7 @@ VehicleChoiceGrid = {
                 VehicleChoice.BOWSER_BIKE,
                 VehicleChoice.WARIO_BIKE,
             ),
-            (   VehicleChoice.TWINKLE_STAR, 
-                VehicleChoice.TORPEDO, 
-                VehicleChoice.PHANTOM
-            ),
+            (VehicleChoice.TWINKLE_STAR, VehicleChoice.TORPEDO, VehicleChoice.PHANTOM),
         ),
     },
 }
@@ -844,37 +841,30 @@ Course2CupMap = {
     CourseChoice.MOO_MOO_MEADOWS: CupChoice.MUSHROOM_CUP,
     CourseChoice.MUSHROOM_GORGE: CupChoice.MUSHROOM_CUP,
     CourseChoice.TOADS_FACTORY: CupChoice.MUSHROOM_CUP,
-
     CourseChoice.MARIO_CIRCUIT: CupChoice.FLOWER_CUP,
     CourseChoice.COCONUT_MALL: CupChoice.FLOWER_CUP,
     CourseChoice.DK_SUMMIT: CupChoice.FLOWER_CUP,
     CourseChoice.WARIOS_GOLD_MINE: CupChoice.FLOWER_CUP,
-
     CourseChoice.DAISY_CIRCUIT: CupChoice.STAR_CUP,
     CourseChoice.KOOPA_CAPE: CupChoice.STAR_CUP,
     CourseChoice.MAPLE_TREEWAY: CupChoice.STAR_CUP,
     CourseChoice.GRUMBLE_VOLCANO: CupChoice.STAR_CUP,
-
     CourseChoice.DRY_DRY_RUINS: CupChoice.SPECIAL_CUP,
     CourseChoice.MOONVIEW_HIGHWAY: CupChoice.SPECIAL_CUP,
     CourseChoice.BOWSERS_CASTLE: CupChoice.SPECIAL_CUP,
     CourseChoice.RAINBOW_ROAD: CupChoice.SPECIAL_CUP,
-
     CourseChoice.GCN_PEACH_BEACH: CupChoice.SHELL_CUP,
     CourseChoice.DS_YOSHI_FALLS: CupChoice.SHELL_CUP,
     CourseChoice.SNES_GHOST_VALLEY_2: CupChoice.SHELL_CUP,
     CourseChoice.N64_MARIO_RACEWAY: CupChoice.SHELL_CUP,
-
     CourseChoice.N64_SHERBET_LAND: CupChoice.BANANA_CUP,
     CourseChoice.GBA_SHY_GUY_BEACH: CupChoice.BANANA_CUP,
     CourseChoice.DS_DELFINO_SQUARE: CupChoice.BANANA_CUP,
     CourseChoice.GCN_WALUIGI_STADIUM: CupChoice.BANANA_CUP,
-
     CourseChoice.DS_DESERT_STREET: CupChoice.LEAF_CUP,
     CourseChoice.GBA_BOWSER_CASTLE_3: CupChoice.LEAF_CUP,
     CourseChoice.N64_DKS_JUNGLE_PARKWAY: CupChoice.LEAF_CUP,
     CourseChoice.GCN_MARIO_CIRCUIT: CupChoice.LEAF_CUP,
-
     CourseChoice.SNES_MARIO_CIRCUIT_3: CupChoice.LIGHTNING_CUP,
     CourseChoice.DS_PEACH_GARDENS: CupChoice.LIGHTNING_CUP,
     CourseChoice.GCN_DK_MOUNTAIN: CupChoice.LIGHTNING_CUP,
@@ -891,11 +881,13 @@ class RuleRow(Enum):
     RACES = "Races"
     OK = "OK"
 
+
 class CCChoice(Enum):
     CC_50 = "50cc"
     CC_100 = "100cc"
     CC_150 = "150cc"
     MIRROR = "mirror"
+
 
 class CPUChoice(Enum):
     EASY = "Easy"
@@ -903,21 +895,25 @@ class CPUChoice(Enum):
     HARD = "Hard"
     OFF = "Off"
 
+
 class VehicleRuleChoice(Enum):
     ALL = "All"
     KARTS = "Karts"
     BIKES = "Bikes"
+
 
 class CourseRuleChoice(Enum):
     CHOOSE = "Choose"
     RANDOM = "Random"
     IN_ORDER = "In Order"
 
+
 class ItemRuleChoice(Enum):
     RECOMMENDED = "Recommended"
     FRANTIC = "Frantic"
     BASIC = "Basic"
     NONE = "None"
+
 
 class RacesChoice(Enum):
     RACES_2 = 2
@@ -929,6 +925,7 @@ class RacesChoice(Enum):
     RACES_12 = 12
     RACES_16 = 16
     RACES_32 = 32
+
 
 RulesGrid = {
     RuleRow.CLASS: (
@@ -1003,44 +1000,51 @@ class OptionType:
             self.vehicle = [VehicleChoice.BON_BON] * self.num_agents
         if not self.drift_modes:
             self.drift_modes = [DriftModeChoice.MANUAL] * self.num_agents
-        
+
         if self.num_agents == 1:
             if not self.character:
                 self.character = [
-                        CharacterChoice.MARIO,
-                    ]
+                    CharacterChoice.MARIO,
+                ]
         elif self.num_agents == 4:
             if not self.character:
                 self.character = [
-                        CharacterChoice.MARIO,
-                        CharacterChoice.LUIGI,
-                        CharacterChoice.YOSHI,
-                        CharacterChoice.PEACH,
-                    ]
+                    CharacterChoice.MARIO,
+                    CharacterChoice.LUIGI,
+                    CharacterChoice.YOSHI,
+                    CharacterChoice.PEACH,
+                ]
         elif self.num_agents == 12:
             if not self.character:
                 self.character = [
-                        CharacterChoice.MARIO,
-                        CharacterChoice.LUIGI,
-                        CharacterChoice.YOSHI,
-                        CharacterChoice.PEACH,
-                        CharacterChoice.BABY_MARIO,
-                        CharacterChoice.BABY_LUIGI,
-                        CharacterChoice.BABY_PEACH,
-                        CharacterChoice.BABY_DAISY,
-                        CharacterChoice.TOAD,
-                        CharacterChoice.TOADETTE,
-                        CharacterChoice.KOOPA_TROOPA,
-                        CharacterChoice.DRY_BONES,
-                        CharacterChoice.DAISY,
-                        CharacterChoice.BIRDO,
-                        CharacterChoice.DIDDY_KONG,
-                        CharacterChoice.BOWSER_JR,
-                    ]
+                    CharacterChoice.MARIO,
+                    CharacterChoice.LUIGI,
+                    CharacterChoice.YOSHI,
+                    CharacterChoice.PEACH,
+                    CharacterChoice.BABY_MARIO,
+                    CharacterChoice.BABY_LUIGI,
+                    CharacterChoice.BABY_PEACH,
+                    CharacterChoice.BABY_DAISY,
+                    CharacterChoice.TOAD,
+                    CharacterChoice.TOADETTE,
+                    CharacterChoice.KOOPA_TROOPA,
+                    CharacterChoice.DRY_BONES,
+                    CharacterChoice.DAISY,
+                    CharacterChoice.BIRDO,
+                    CharacterChoice.DIDDY_KONG,
+                    CharacterChoice.BOWSER_JR,
+                ]
         else:
-            raise ValueError(f"num_agents should be 1, 4, or 12, but it is {self.num_agents}")
-        
-        if not self.num_agents == len(self.character) == len(self.vehicle) == len(self.drift_modes):
+            raise ValueError(
+                f"num_agents should be 1, 4, or 12, but it is {self.num_agents}"
+            )
+
+        if (
+            not self.num_agents
+            == len(self.character)
+            == len(self.vehicle)
+            == len(self.drift_modes)
+        ):
             raise ValueError(
                 "Length of character, vehicle, and drift_modes lists must match num_agents. "
                 f"{self.num_agents=}, "
