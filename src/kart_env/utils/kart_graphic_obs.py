@@ -1,5 +1,5 @@
 import numpy as np
-from multiprocessing import shared_memory
+from multiprocessing import shared_memory, resource_tracker
 import struct
 from typing import List
 from PIL import Image
@@ -18,6 +18,7 @@ class KartGraphicObs:
         self.VERSION = 2
 
         self.shm = shared_memory.SharedMemory(name=self.shm_name)
+        resource_tracker.unregister("/" + self.shm.name, "shared_memory")
 
     def get(self) -> List[np.ndarray]:
         assert self.shm.buf is not None
@@ -51,9 +52,6 @@ class KartGraphicObs:
 
     def close(self):
         self.shm.close()
-
-    def __del__(self):
-        self.close()
 
 
 def save_graphic_obs(observation: List[np.ndarray]):
