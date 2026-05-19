@@ -40,6 +40,7 @@ class KartEnvironment(ParallelEnv):
 
         self.processes: list[subprocess.Popen] = []
 
+        self.is_license_created = True
         user_dir = pathlib.Path("users") / str(self.env_id)
         if not user_dir.exists():
             dolphin_settings_path = pathlib.Path(__file__).parent / "dolphin_settings"
