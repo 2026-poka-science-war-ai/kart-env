@@ -1,7 +1,7 @@
 [project]
 name = "kart-env"
 version = "0.1.0"
-description = "Kart environment for reinforcement learning"
+description = "Kart environment based on PettingZoo"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
