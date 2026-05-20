@@ -97,13 +97,14 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen en_US.UTF-8
 
-COPY --from=dolphin-src / /dolphin-src
-RUN cd /dolphin-src && \
+RUN --mount=type=bind,from=dolphin-src,target=/dolphin-src,rw=true \
+    --mount=type=cache,target=/dolphin-src/build \
+    cd /dolphin-src && \
     git -c submodule."Externals/Qt".update=none \
         -c submodule."Externals/FFmpeg-bin".update=none \
         -c submodule."Externals/libadrenotools".update=none \
         submodule update --init --recursive && \
-    mkdir build && cd build && \
+    mkdir -p build && cd build && \
     cmake .. \
         -DUSE_SYSTEM_SDL3=OFF \
         -DUSE_SYSTEM_FMT=OFF \
@@ -113,8 +114,7 @@ RUN cd /dolphin-src && \
         -DUSE_SYSTEM_LIBMGBA=OFF \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
     make -j$(nproc) && \
-    make install && \
-    cd / && rm -rf /dolphin-src
+    make install
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
