@@ -14,7 +14,7 @@ from pettingzoo import ParallelEnv
 
 from .utils.dolphin_mem import DolphinMem
 from .utils.kart_graphic_obs import KartGraphicObs
-from .utils.helper import launch_game
+from .utils.helper import launch_game, get_num_gpus
 from .utils.macro_helper import OptionType
 from .utils.enums import (
     VNC_BASE,
@@ -102,7 +102,7 @@ class KartEnvironment(ParallelEnv):
         dolphin_command = [
             "vglrun",
             "-d",
-            "egl0",
+            "egl" + str(self.env_id % get_num_gpus()),
             DOLPHIN_PATH,
             "--batch",
             f"--user={user_dir}",

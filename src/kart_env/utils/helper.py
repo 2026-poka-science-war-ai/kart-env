@@ -3,12 +3,21 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
+import subprocess
+import functools
 from typing import TYPE_CHECKING
 
 from .macro_helper import *
 
 if TYPE_CHECKING:
     from ..kart_environment import KartEnvironment
+
+
+@functools.lru_cache(maxsize=1)
+def get_num_gpus() -> int:
+    output = subprocess.check_output(["nvidia-smi", "--list-gpus"]).decode().strip()
+    num_gpus = len(output.split("\n"))
+    return num_gpus
 
 
 def _options_to_dict(options: OptionType) -> dict:
