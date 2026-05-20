@@ -95,10 +95,7 @@ RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list && \
     && rm virtualgl_3.1.4_amd64.deb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && locale-gen en_US.UTF-8 && \
-    wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run && \
-    sh cuda_11.8.0_520.61.05_linux.run --override --silent --toolkit && \
-    rm cuda_11.8.0_520.61.05_linux.run
+    && locale-gen en_US.UTF-8
 
 COPY --from=dolphin-src / /dolphin-src
 RUN cd /dolphin-src && \
