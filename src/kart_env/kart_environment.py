@@ -36,7 +36,8 @@ class KartEnvironment(ParallelEnv):
         self.env_id = env_id
         self.options = options if options is not None else OptionType()
         self._closed = False
-        self.agents = [i for i in range(self.options.num_agents)]
+        self.possible_agents = [i for i in range(self.options.num_agents)]
+        self.agents = self.possible_agents.copy()
 
         self.processes: list[subprocess.Popen] = []
 
